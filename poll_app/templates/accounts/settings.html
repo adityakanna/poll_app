@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Settings — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title"><i class="bi bi-gear me-2" style="color:var(--accent)"></i>Account Settings</h1>
+    <p class="page-subtitle">Manage your profile, security, and account preferences</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+
+        <!-- Profile Section -->
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <i class="bi bi-person-circle"></i>
+                <h6>Profile Information</h6>
+            </div>
+            <div class="settings-section-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2 me-2"></i>Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Section -->
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <i class="bi bi-shield-lock"></i>
+                <h6>Security</h6>
+            </div>
+            <div class="settings-section-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="old_password" class="form-control" placeholder="Enter current password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password1" class="form-control" placeholder="Enter new password" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="new_password2" class="form-control" placeholder="Repeat new password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-key me-2"></i>Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-section" style="border-color: rgba(248,113,113,0.3)">
+            <div class="settings-section-header" style="background:rgba(248,113,113,0.05); border-color: rgba(248,113,113,0.2)">
+                <i class="bi bi-exclamation-triangle" style="color:var(--danger)"></i>
+                <h6 style="color:var(--danger)">Danger Zone</h6>
+            </div>
+            <div class="settings-section-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <p class="fw-600 mb-1">Delete Account</p>
+                        <p class="text-muted small mb-0">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                    </div>
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="bi bi-trash3 me-2"></i>Delete Account
+                    </button>
+                </div>
+                <hr style="border-color:var(--border); margin: 20px 0">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <p class="fw-600 mb-1">Sign Out</p>
+                        <p class="text-muted small mb-0">Sign out from your current session.</p>
+                    </div>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="stat-card mb-3">
+            <div class="stat-value">{{ user.polls.count }}</div>
+            <div class="stat-label">Polls Created</div>
+        </div>
+        <div class="stat-card mb-3">
+            <div class="stat-value">{{ user.votes.count }}</div>
+            <div class="stat-label">Votes Cast</div>
+        </div>
+        <div class="stat-card">
+            <div class="mb-2">
+                <span class="text-muted small text-uppercase" style="letter-spacing:.5px">Member Since</span>
+            </div>
+            <div style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem">
+                {{ user.date_joined|date:"M d, Y" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title" style="color:var(--danger)">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Account
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? <strong>This action cannot be undone.</strong></p>
+                <ul class="text-muted small">
+                    <li>All your polls will be permanently deleted</li>
+                    <li>All votes you've cast will be removed</li>
+                    <li>Your account data will be erased</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'delete_account' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3 me-2"></i>Yes, Delete My Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

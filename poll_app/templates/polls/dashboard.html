@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — VoxPoll{% endblock %}
+
+{% block content %}
+<!-- Welcome Header -->
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="page-title">Welcome back, {{ user.username }} 👋</h1>
+        <p class="page-subtitle">Here's what's happening in the community</p>
+    </div>
+    <a href="{% url 'create_poll' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Create Poll
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_polls }}</div>
+            <div class="stat-label">Total Polls</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ user_poll_count }}</div>
+            <div class="stat-label">Your Polls</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ user_vote_count }}</div>
+            <div class="stat-label">Votes Cast</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_polls|add:user_vote_count }}</div>
+            <div class="stat-label">Activity</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Polls -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 style="font-size:1.2rem; margin:0">Recent Polls</h2>
+    <a href="{% url 'poll_list' %}" class="btn btn-outline-secondary btn-sm">View All</a>
+</div>
+
+{% if poll_data %}
+<div class="row g-3">
+    {% for item in poll_data|slice:":6" %}
+    <div class="col-md-6 col-xl-4">
+        <div class="poll-card h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="poll-question">{{ item.poll.question }}</div>
+                {% if item.user_voted %}
+                <span class="voted-badge ms-2 flex-shrink-0"><i class="bi bi-check2-circle"></i>Voted</span>
+                {% endif %}
+            </div>
+            <div class="poll-meta">
+                <span class="poll-meta-item"><i class="bi bi-person"></i>{{ item.poll.created_by.username }}</span>
+                <span class="poll-meta-item"><i class="bi bi-people"></i>{{ item.total_votes }} vote{{ item.total_votes|pluralize }}</span>
+                <span class="poll-meta-item"><i class="bi bi-clock"></i>{{ item.poll.created_at|date:"M d" }}</span>
+                <span class="poll-meta-item"><i class="bi bi-list-ul"></i>{{ item.poll.options.count }} options</span>
+            </div>
+            <div class="d-flex gap-2 mt-auto">
+                <a href="{% url 'vote' item.poll.id %}" class="btn btn-primary btn-sm flex-grow-1">
+                    <i class="bi bi-hand-index me-1"></i>{% if item.user_voted %}Change Vote{% else %}Vote{% endif %}
+                </a>
+                <a href="{% url 'results' item.poll.id %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-bar-chart-line"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-bar-chart"></i></div>
+    <h5>No polls yet</h5>
+    <p class="text-muted small">Be the first to create a poll!</p>
+    <a href="{% url 'create_poll' %}" class="btn btn-primary mt-2">Create First Poll</a>
+</div>
+{% endif %}
+{% endblock %}

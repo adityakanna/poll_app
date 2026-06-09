@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Results — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="page-header">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="font-size:.85rem">
+                    <li class="breadcrumb-item"><a href="{% url 'poll_list' %}" class="text-decoration-none" style="color:var(--text-muted)">Polls</a></li>
+                    <li class="breadcrumb-item active" style="color:var(--text-muted)">Results</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-3">
+                <h1 class="page-title mb-0">Live Results</h1>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-1" style="font-family:'Syne',sans-serif">{{ poll.question }}</h5>
+                <div class="text-muted small d-flex flex-wrap gap-3">
+                    <span><i class="bi bi-person me-1"></i>{{ poll.created_by.username }}</span>
+                    <span><i class="bi bi-calendar3 me-1"></i>{{ poll.created_at|date:"M d, Y" }}</span>
+                    <span><i class="bi bi-people me-1"></i><span id="totalVotes">{{ total }}</span> total vote{{ total|pluralize }}</span>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                {% if user_vote %}
+                <div class="alert alert-success mb-4">
+                    <i class="bi bi-check2-circle me-2"></i>
+                    You voted for <strong>"{{ user_vote.option.option_text }}"</strong>.
+                    <a href="{% url 'vote' poll.id %}" class="ms-2" style="color:var(--accent)">Change vote →</a>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    You haven't voted on this poll yet.
+                    <a href="{% url 'vote' poll.id %}" class="ms-2" style="color:var(--accent2)">Vote now →</a>
+                </div>
+                {% endif %}
+
+                <div id="resultsContainer">
+                    {% for r in results %}
+                    <div class="result-row" data-option-id="{{ r.id }}">
+                        <div class="result-label">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="result-option-name">{{ r.text }}</span>
+                                {% if r.votes == results.0.votes and r.votes > 0 %}
+                                <span class="winner-tag">Leading</span>
+                                {% endif %}
+                                {% if user_vote and user_vote.option.id == r.id %}
+                                <span class="voted-badge"><i class="bi bi-check2"></i>Your Vote</span>
+                                {% endif %}
+                            </div>
+                            <span class="result-stats">{{ r.votes }} vote{{ r.votes|pluralize }} · {{ r.percentage }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if r.votes == results.0.votes and r.votes > 0 %}winner{% endif %}" 
+                                 style="width: {{ r.percentage }}%"
+                                 role="progressbar" 
+                                 aria-valuenow="{{ r.percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <a href="{% url 'vote' poll.id %}" class="btn btn-primary">
+                        <i class="bi bi-hand-index me-2"></i>
+                        {% if user_vote %}Change Vote{% else %}Vote Now{% endif %}
+                    </a>
+                    <a href="{% url 'poll_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Polls
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center text-muted small mt-3">
+            <i class="bi bi-arrow-repeat me-1"></i>Results refresh automatically every 3 seconds
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const pollId = {{ poll.id }};
+const userVoteOptionId = {% if user_vote %}{{ user_vote.option.id }}{% else %}null{% endif %};
+
+function updateResults(data) {
+    const container = document.getElementById('resultsContainer');
+    const totalEl = document.getElementById('totalVotes');
+    totalEl.textContent = data.total;
+
+    // Find max votes
+    const maxVotes = data.results.reduce((m, r) => Math.max(m, r.votes), 0);
+
+    data.results.forEach(r => {
+        const row = container.querySelector(`[data-option-id="${r.id}"]`);
+        if (!row) return;
+
+        const stats = row.querySelector('.result-stats');
+        stats.textContent = `${r.votes} vote${r.votes !== 1 ? 's' : ''} · ${r.percentage}%`;
+
+        const bar = row.querySelector('.progress-bar');
+        bar.style.width = r.percentage + '%';
+        bar.setAttribute('aria-valuenow', r.percentage);
+
+        // Winner styling
+        if (r.votes === maxVotes && r.votes > 0) {
+            bar.classList.add('winner');
+        } else {
+            bar.classList.remove('winner');
+        }
+    });
+}
+
+async function fetchResults() {
+    try {
+        const resp = await fetch(`/api/results/${pollId}/`);
+        if (resp.ok) {
+            const data = await resp.json();
+            updateResults(data);
+        }
+    } catch(e) {
+        // Silently fail
+    }
+}
+
+// Poll every 3 seconds
+setInterval(fetchResults, 3000);
+</script>
+{% endblock %}

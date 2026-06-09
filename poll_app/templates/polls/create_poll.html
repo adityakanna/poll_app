@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Create Poll — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="page-header">
+            <h1 class="page-title"><i class="bi bi-plus-circle me-2" style="color:var(--accent)"></i>Create a Poll</h1>
+            <p class="page-subtitle">Ask the community anything</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" id="createPollForm">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label">Poll Question <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="question" id="question" class="form-control" 
+                               placeholder="e.g. Which programming language do you prefer?"
+                               value="{{ question|default:'' }}" maxlength="500" required>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div class="text-muted small">Be specific and clear</div>
+                            <div class="text-muted small" id="questionCount">0/500</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Options <span style="color:var(--danger)">*</span></label>
+                        <p class="text-muted small mb-3">Add 2–10 options for people to choose from</p>
+
+                        <div id="optionsList">
+                            {% if options %}
+                                {% for opt in options %}
+                                <div class="option-row" data-index="{{ forloop.counter }}">
+                                    <div class="option-number">{{ forloop.counter }}</div>
+                                    <input type="text" name="options[]" class="form-control option-input" 
+                                           placeholder="Option {{ forloop.counter }}" value="{{ opt }}" required>
+                                    <button type="button" class="btn-remove-option" onclick="removeOption(this)" title="Remove">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="option-row" data-index="1">
+                                    <div class="option-number">1</div>
+                                    <input type="text" name="options[]" class="form-control option-input" placeholder="Option 1" required>
+                                    <button type="button" class="btn-remove-option" onclick="removeOption(this)" title="Remove" disabled style="opacity:.3">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                <div class="option-row" data-index="2">
+                                    <div class="option-number">2</div>
+                                    <input type="text" name="options[]" class="form-control option-input" placeholder="Option 2" required>
+                                    <button type="button" class="btn-remove-option" onclick="removeOption(this)" title="Remove" disabled style="opacity:.3">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" id="addOptionBtn" onclick="addOption()" class="btn btn-outline-secondary btn-sm mt-3">
+                            <i class="bi bi-plus me-1"></i>Add Option
+                        </button>
+                        <span class="text-muted small ms-2" id="optionCounter">2 / 10 options</span>
+                    </div>
+
+                    <hr style="border-color:var(--border); margin: 28px 0">
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-3" id="submitBtn">
+                            <i class="bi bi-send me-2"></i>Publish Poll
+                        </button>
+                        <a href="{% url 'poll_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let optionCount = document.querySelectorAll('.option-row').length;
+    const MAX_OPTIONS = 10;
+    const MIN_OPTIONS = 2;
+
+    function updateNumbers() {
+        const rows = document.querySelectorAll('.option-row');
+        optionCount = rows.length;
+        rows.forEach((row, i) => {
+            row.querySelector('.option-number').textContent = i + 1;
+            row.querySelector('.option-input').placeholder = `Option ${i + 1}`;
+            const btn = row.querySelector('.btn-remove-option');
+            if (optionCount <= MIN_OPTIONS) {
+                btn.disabled = true;
+                btn.style.opacity = '0.3';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        });
+        document.getElementById('optionCounter').textContent = `${optionCount} / ${MAX_OPTIONS} options`;
+        document.getElementById('addOptionBtn').disabled = optionCount >= MAX_OPTIONS;
+    }
+
+    function addOption() {
+        if (optionCount >= MAX_OPTIONS) return;
+        const list = document.getElementById('optionsList');
+        const div = document.createElement('div');
+        div.className = 'option-row';
+        div.innerHTML = `
+            <div class="option-number">${optionCount + 1}</div>
+            <input type="text" name="options[]" class="form-control option-input" placeholder="Option ${optionCount + 1}">
+            <button type="button" class="btn-remove-option" onclick="removeOption(this)" title="Remove">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        list.appendChild(div);
+        div.querySelector('input').focus();
+        updateNumbers();
+    }
+
+    function removeOption(btn) {
+        if (optionCount <= MIN_OPTIONS) return;
+        btn.closest('.option-row').remove();
+        updateNumbers();
+    }
+
+    // Character counter
+    const questionInput = document.getElementById('question');
+    const questionCount = document.getElementById('questionCount');
+    questionInput.addEventListener('input', () => {
+        questionCount.textContent = `${questionInput.value.length}/500`;
+    });
+    questionCount.textContent = `${questionInput.value.length}/500`;
+
+    updateNumbers();
+</script>
+{% endblock %}

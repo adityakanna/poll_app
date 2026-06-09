@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VoxPoll{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #0D0D0D;
+            --accent: #6EE7B7;
+            --accent2: #38BDF8;
+            --surface: #111827;
+            --surface2: #1F2937;
+            --surface3: #374151;
+            --border: #2D3748;
+            --text: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --danger: #F87171;
+            --warning: #FBBF24;
+            --success: #6EE7B7;
+            --card-radius: 16px;
+            --nav-h: 68px;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            background: var(--brand);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6, .display-font {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+        }
+
+        /* ─── NAV ─── */
+        .navbar {
+            background: rgba(13,13,13,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            height: var(--nav-h);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--text) !important;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand span {
+            color: var(--accent);
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 6px 14px !important;
+            border-radius: 8px;
+            transition: all 0.2s;
+            letter-spacing: 0.2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text) !important;
+            background: var(--surface2);
+        }
+
+        .nav-link i { margin-right: 6px; }
+
+        .btn-nav-cta {
+            background: var(--accent);
+            color: #0D0D0D !important;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 7px 18px !important;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-nav-cta:hover {
+            background: #a7f3d0;
+            transform: translateY(-1px);
+        }
+
+        /* ─── MAIN ─── */
+        .main-content {
+            padding: 40px 0 80px;
+            min-height: calc(100vh - var(--nav-h));
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            color: var(--text);
+        }
+
+        .card-header {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            border-radius: var(--card-radius) var(--card-radius) 0 0 !important;
+            padding: 20px 24px;
+        }
+
+        /* ─── POLL CARD ─── */
+        .poll-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .poll-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .poll-card:hover {
+            border-color: var(--surface3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        .poll-card:hover::before { opacity: 1; }
+
+        .poll-question {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .poll-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .poll-meta-item {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .poll-meta-item i { font-size: 0.75rem; }
+
+        .voted-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(110,231,183,0.12);
+            color: var(--accent);
+            border: 1px solid rgba(110,231,183,0.25);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ─── BUTTONS ─── */
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #0D0D0D;
+        }
+
+        .btn-primary:hover {
+            background: #a7f3d0;
+            border-color: #a7f3d0;
+            color: #0D0D0D;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--accent);
+            color: #0D0D0D;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--surface2);
+            color: var(--text);
+            border-color: var(--surface3);
+        }
+
+        .btn-danger { background: var(--danger); border-color: var(--danger); color: #0D0D0D; }
+        .btn-danger:hover { background: #fca5a5; border-color: #fca5a5; color: #0D0D0D; }
+
+        .btn-outline-danger { border-color: var(--danger); color: var(--danger); }
+        .btn-outline-danger:hover { background: var(--danger); color: #0D0D0D; }
+
+        /* ─── FORMS ─── */
+        .form-control, .form-select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--surface2);
+            border-color: var(--accent);
+            color: var(--text);
+            box-shadow: 0 0 0 3px rgba(110,231,183,0.15);
+        }
+
+        .form-control::placeholder { color: var(--text-muted); }
+        
+        .form-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* ─── RADIO OPTIONS ─── */
+        .vote-option {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .vote-option:hover {
+            border-color: var(--accent);
+            background: rgba(110,231,183,0.05);
+        }
+
+        .vote-option.selected {
+            border-color: var(--accent);
+            background: rgba(110,231,183,0.08);
+        }
+
+        .vote-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        /* ─── PROGRESS ─── */
+        .result-row {
+            margin-bottom: 20px;
+        }
+
+        .result-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .result-option-name { font-weight: 600; }
+
+        .result-stats {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .progress {
+            height: 10px;
+            background: var(--surface2);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 99px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .progress-bar.winner {
+            background: linear-gradient(90deg, var(--accent), #34d399);
+        }
+
+        /* ─── TOASTS ─── */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 12px;
+            min-width: 280px;
+        }
+
+        .toast.toast-success { border-left: 4px solid var(--accent); }
+        .toast.toast-error { border-left: 4px solid var(--danger); }
+        .toast.toast-info { border-left: 4px solid var(--accent2); }
+        .toast.toast-warning { border-left: 4px solid var(--warning); }
+
+        /* ─── MODALS ─── */
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            color: var(--text);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-close { filter: invert(1); }
+
+        /* ─── STATS CARDS ─── */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            opacity: 0.4;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h5 {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* ─── PAGE HEADER ─── */
+        .page-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ─── ALERTS ─── */
+        .alert {
+            border-radius: 12px;
+            border: 1px solid transparent;
+            font-size: 0.875rem;
+        }
+
+        .alert-success { background: rgba(110,231,183,0.1); border-color: rgba(110,231,183,0.3); color: var(--accent); }
+        .alert-danger { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); color: var(--danger); }
+        .alert-info { background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.3); color: var(--accent2); }
+        .alert-warning { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.3); color: var(--warning); }
+
+        /* ─── OPTION BUILDER ─── */
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            animation: fadeSlideIn 0.2s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-number {
+            background: var(--surface3);
+            color: var(--text-muted);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .btn-remove-option {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-remove-option:hover {
+            background: rgba(248,113,113,0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* ─── LIVE INDICATOR ─── */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* ─── WINNER HIGHLIGHT ─── */
+        .winner-tag {
+            background: rgba(110,231,183,0.15);
+            color: var(--accent);
+            border: 1px solid rgba(110,231,183,0.3);
+            border-radius: 20px;
+            padding: 1px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── NAV TOGGLER ─── */
+        .navbar-toggler {
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(156, 163, 175, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* ─── AUTH PAGES ─── */
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+            background: var(--brand);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(110,231,183,0.06) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+        }
+
+        .auth-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
+            bottom: -100px;
+            left: -100px;
+        }
+
+        .auth-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-logo span { color: var(--accent); }
+
+        .auth-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 32px;
+        }
+
+        .divider-text {
+            text-align: center;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 20px 0;
+        }
+
+        .divider-text::before, .divider-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider-text::before { left: 0; }
+        .divider-text::after { right: 0; }
+
+        /* ─── SETTINGS ─── */
+        .settings-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .settings-section-header {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-section-header i {
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .settings-section-header h6 {
+            margin: 0;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .settings-section-body { padding: 24px; }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">Vox<span>Poll</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto ms-3 gap-1">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                        <i class="bi bi-house"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'poll_list' %}active{% endif %}" href="{% url 'poll_list' %}">
+                        <i class="bi bi-list-ul"></i>All Polls
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'my_polls' %}active{% endif %}" href="{% url 'my_polls' %}">
+                        <i class="bi bi-collection"></i>My Polls
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'settings' %}">
+                        <i class="bi bi-gear"></i>Settings
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small me-2">
+                    <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                </span>
+                <a href="{% url 'create_poll' %}" class="btn btn-nav-cta btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Create Poll
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<!-- Toast Container -->
+<div class="toast-container">
+    {% for message in messages %}
+    <div class="toast show toast-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}" role="alert" id="toast-{{ forloop.counter }}">
+        <div class="toast-body d-flex align-items-center gap-2 p-3">
+            {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill text-success"></i>
+            {% elif message.tags == 'error' %}<i class="bi bi-x-circle-fill" style="color:var(--danger)"></i>
+            {% elif message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill" style="color:var(--warning)"></i>
+            {% else %}<i class="bi bi-info-circle-fill" style="color:var(--accent2)"></i>{% endif %}
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close ms-auto" onclick="this.closest('.toast').remove()"></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="{% if user.is_authenticated %}main-content{% endif %}">
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-dismiss toasts
+    document.querySelectorAll('.toast').forEach(t => {
+        setTimeout(() => t.remove(), 5000);
+    });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

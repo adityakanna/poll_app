@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Vote — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="page-header">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="font-size:.85rem">
+                    <li class="breadcrumb-item"><a href="{% url 'poll_list' %}" class="text-decoration-none" style="color:var(--text-muted)">Polls</a></li>
+                    <li class="breadcrumb-item active" style="color:var(--text-muted)">Vote</li>
+                </ol>
+            </nav>
+            <h1 class="page-title">Cast Your Vote</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-1" style="font-family:'Syne',sans-serif">{{ poll.question }}</h5>
+                        <div class="text-muted small d-flex gap-3">
+                            <span><i class="bi bi-person me-1"></i>{{ poll.created_by.username }}</span>
+                            <span><i class="bi bi-calendar3 me-1"></i>{{ poll.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    {% if user_vote %}
+                    <span class="voted-badge"><i class="bi bi-check2-circle"></i>Voted</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-4">
+                {% if user_vote %}
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    You previously voted for <strong>"{{ user_vote.option.option_text }}"</strong>. 
+                    You can change your vote by selecting a different option below.
+                </div>
+                {% endif %}
+
+                <form method="POST" id="voteForm">
+                    {% csrf_token %}
+
+                    <div id="optionsContainer">
+                        {% for option in poll.options.all %}
+                        <label class="vote-option {% if user_vote and user_vote.option.id == option.id %}selected{% endif %}"
+                               for="option_{{ option.id }}">
+                            <input type="radio" name="option" id="option_{{ option.id }}" 
+                                   value="{{ option.id }}"
+                                   {% if user_vote and user_vote.option.id == option.id %}checked{% endif %}
+                                   onchange="selectOption(this)">
+                            <span class="flex-grow-1">{{ option.option_text }}</span>
+                            {% if user_vote and user_vote.option.id == option.id %}
+                            <i class="bi bi-check2-circle" style="color:var(--accent)"></i>
+                            {% endif %}
+                        </label>
+                        {% endfor %}
+                    </div>
+
+                    <hr style="border-color:var(--border); margin: 24px 0">
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-3" id="voteBtn">
+                            <i class="bi bi-check2-circle me-2"></i>
+                            {% if user_vote %}Change Vote{% else %}Submit Vote{% endif %}
+                        </button>
+                        <a href="{% url 'results' poll.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-bar-chart-line me-1"></i>View Results
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectOption(radio) {
+    document.querySelectorAll('.vote-option').forEach(el => el.classList.remove('selected'));
+    radio.closest('.vote-option').classList.add('selected');
+}
+</script>
+{% endblock %}

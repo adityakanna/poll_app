@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}My Polls — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="page-title">My Polls</h1>
+        <p class="page-subtitle">Manage polls you've created</p>
+    </div>
+    <a href="{% url 'create_poll' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Create Poll
+    </a>
+</div>
+
+{% if poll_data %}
+<div class="row g-3">
+    {% for item in poll_data %}
+    <div class="col-md-6 col-xl-4">
+        <div class="poll-card h-100 d-flex flex-column">
+            <div class="poll-question mb-2">{{ item.poll.question }}</div>
+            <div class="poll-meta mb-3">
+                <span class="poll-meta-item"><i class="bi bi-people"></i>{{ item.total_votes }} vote{{ item.total_votes|pluralize }}</span>
+                <span class="poll-meta-item"><i class="bi bi-list-ul"></i>{{ item.poll.options.count }} options</span>
+                <span class="poll-meta-item"><i class="bi bi-calendar3"></i>{{ item.poll.created_at|date:"M d, Y" }}</span>
+            </div>
+
+            <!-- Options Preview -->
+            <div class="mb-3">
+                {% for option in item.poll.options.all|slice:":3" %}
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="text-muted small">{{ option.option_text }}</span>
+                    <span class="text-muted small">{{ option.vote_count }} vote{{ option.vote_count|pluralize }}</span>
+                </div>
+                {% endfor %}
+                {% if item.poll.options.count > 3 %}
+                <div class="text-muted small">+{{ item.poll.options.count|add:"-3" }} more options</div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex gap-2 mt-auto">
+                <a href="{% url 'results' item.poll.id %}" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                    <i class="bi bi-bar-chart-line me-1"></i>Results
+                </a>
+                <a href="{% url 'edit_poll' item.poll.id %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-outline-danger btn-sm" 
+                        onclick="confirmDelete({{ item.poll.id }}, '{{ item.poll.question|escapejs }}')"
+                        title="Delete poll">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-collection"></i></div>
+    <h5>No polls created yet</h5>
+    <p class="text-muted small">Create your first poll to see it here.</p>
+    <a href="{% url 'create_poll' %}" class="btn btn-primary mt-2">Create First Poll</a>
+</div>
+{% endif %}
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--danger)">
+                    <i class="bi bi-trash3 me-2"></i>Delete Poll
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this poll?</p>
+                <div class="card p-3 mb-3" style="background:var(--surface2)">
+                    <em id="deletePollQuestion" class="text-muted"></em>
+                </div>
+                <p class="text-muted small">All votes for this poll will also be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3 me-2"></i>Delete Poll
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(pollId, question) {
+    document.getElementById('deletePollQuestion').textContent = question;
+    document.getElementById('deleteForm').action = `/polls/delete/${pollId}/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Edit Poll — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="page-header">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="font-size:.85rem">
+                    <li class="breadcrumb-item"><a href="{% url 'my_polls' %}" class="text-decoration-none" style="color:var(--text-muted)">My Polls</a></li>
+                    <li class="breadcrumb-item active" style="color:var(--text-muted)">Edit</li>
+                </ol>
+            </nav>
+            <h1 class="page-title"><i class="bi bi-pencil me-2" style="color:var(--accent)"></i>Edit Poll</h1>
+        </div>
+
+        <div class="alert alert-warning mb-4">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Note:</strong> Editing this poll will reset all existing votes.
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" id="editPollForm">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label">Poll Question <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="question" class="form-control" 
+                               value="{{ poll.question }}" maxlength="500" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Options</label>
+                        <p class="text-muted small mb-3">Minimum 2, maximum 10 options</p>
+                        <div id="optionsList">
+                            {% for opt in existing_options %}
+                            <div class="option-row" data-index="{{ forloop.counter }}">
+                                <div class="option-number">{{ forloop.counter }}</div>
+                                <input type="text" name="options[]" class="form-control option-input" 
+                                       placeholder="Option {{ forloop.counter }}" value="{{ opt }}">
+                                <button type="button" class="btn-remove-option" onclick="removeOption(this)" title="Remove">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="addOptionBtn" onclick="addOption()" class="btn btn-outline-secondary btn-sm mt-3">
+                            <i class="bi bi-plus me-1"></i>Add Option
+                        </button>
+                        <span class="text-muted small ms-2" id="optionCounter"></span>
+                    </div>
+
+                    <hr style="border-color:var(--border); margin: 28px 0">
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-3">
+                            <i class="bi bi-check2 me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'my_polls' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let optionCount = document.querySelectorAll('.option-row').length;
+const MAX_OPTIONS = 10, MIN_OPTIONS = 2;
+
+function updateNumbers() {
+    const rows = document.querySelectorAll('.option-row');
+    optionCount = rows.length;
+    rows.forEach((row, i) => {
+        row.querySelector('.option-number').textContent = i + 1;
+        const btn = row.querySelector('.btn-remove-option');
+        btn.disabled = optionCount <= MIN_OPTIONS;
+        btn.style.opacity = optionCount <= MIN_OPTIONS ? '0.3' : '1';
+    });
+    document.getElementById('optionCounter').textContent = `${optionCount} / ${MAX_OPTIONS} options`;
+    document.getElementById('addOptionBtn').disabled = optionCount >= MAX_OPTIONS;
+}
+
+function addOption() {
+    if (optionCount >= MAX_OPTIONS) return;
+    const list = document.getElementById('optionsList');
+    const div = document.createElement('div');
+    div.className = 'option-row';
+    div.innerHTML = `
+        <div class="option-number">${optionCount + 1}</div>
+        <input type="text" name="options[]" class="form-control option-input" placeholder="Option ${optionCount + 1}">
+        <button type="button" class="btn-remove-option" onclick="removeOption(this)"><i class="bi bi-x"></i></button>
+    `;
+    list.appendChild(div);
+    div.querySelector('input').focus();
+    updateNumbers();
+}
+
+function removeOption(btn) {
+    if (optionCount <= MIN_OPTIONS) return;
+    btn.closest('.option-row').remove();
+    updateNumbers();
+}
+
+updateNumbers();
+</script>
+{% endblock %}
