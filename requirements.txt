@@ -10,6 +10,7 @@ django-crispy-forms==2.6
 djangorestframework==3.17.1
 fonttools==4.61.1
 git-filter-repo==2.47.0
+gunicorn==26.0.0
 joblib==1.5.3
 kiwisolver==1.4.9
 matplotlib==3.10.8
