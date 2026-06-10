@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% block title %}Search — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="search-wrapper">
+    <div class="container">
+        <!-- Search Bar -->
+        <div class="search-header">
+            <form method="GET" class="search-form">
+                <div class="input-group">
+                    <i class="bi bi-search input-group-icon"></i>
+                    <input type="text" name="q" class="form-control search-input" placeholder="Search users, organizations..." value="{{ query }}" autofocus>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            <!-- Search Results -->
+            <div class="col-lg-8">
+                {% if query %}
+                    <!-- Users Results -->
+                    {% if users %}
+                    <div class="results-section">
+                        <h6 class="results-title">Users</h6>
+                        <div class="results-list">
+                            {% for user in users %}
+                            <div class="result-item">
+                                <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                    <div class="result-avatar">
+                                        {% if user.profile.profile_picture %}
+                                            <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}">
+                                        {% else %}
+                                            <div class="avatar-placeholder">{{ user.username|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="result-info">
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'user_profile' user.id %}">{{ user.username }}</a>
+                                        </h6>
+                                        {% if user.profile.bio %}
+                                        <small class="text-muted">{{ user.profile.bio|truncatewords:10 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if user.id in user_following_users %}
+                                <button class="btn btn-sm btn-outline-secondary unfollow-btn" data-user-id="{{ user.id }}">
+                                    Following
+                                </button>
+                                {% else %}
+                                <button class="btn btn-sm btn-primary follow-btn" data-user-id="{{ user.id }}">
+                                    Follow
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Organizations Results -->
+                    {% if organizations %}
+                    <div class="results-section">
+                        <h6 class="results-title">Organizations</h6>
+                        <div class="results-list">
+                            {% for org in organizations %}
+                            <div class="result-item">
+                                <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                    <div class="result-avatar">
+                                        {% if org.logo %}
+                                            <img src="{{ org.logo.url }}" alt="{{ org.name }}">
+                                        {% else %}
+                                            <div class="avatar-placeholder">{{ org.name|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="result-info">
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'organization_profile' org.id %}">
+                                                {{ org.name }}
+                                                {% if org.verified %}<i class="bi bi-check-circle-fill" style="color: var(--accent); font-size: 0.8rem;"></i>{% endif %}
+                                            </a>
+                                        </h6>
+                                        {% if org.description %}
+                                        <small class="text-muted">{{ org.description|truncatewords:10 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if org.id in user_following_orgs %}
+                                <button class="btn btn-sm btn-outline-secondary unfollow-org-btn" data-org-id="{{ org.id }}">
+                                    Following
+                                </button>
+                                {% else %}
+                                <button class="btn btn-sm btn-primary follow-org-btn" data-org-id="{{ org.id }}">
+                                    Follow
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not users and not organizations %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+                        <h5>No results found</h5>
+                        <p class="text-muted">Try searching with different keywords</p>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Suggested When No Query -->
+                    {% if suggested_orgs %}
+                    <div class="results-section">
+                        <h6 class="results-title">Suggested Organizations</h6>
+                        <div class="results-list">
+                            {% for org in suggested_orgs %}
+                            <div class="result-item">
+                                <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                    <div class="result-avatar">
+                                        {% if org.logo %}
+                                            <img src="{{ org.logo.url }}" alt="{{ org.name }}">
+                                        {% else %}
+                                            <div class="avatar-placeholder">{{ org.name|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="result-info">
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'organization_profile' org.id %}">
+                                                {{ org.name }}
+                                                {% if org.verified %}<i class="bi bi-check-circle-fill" style="color: var(--accent); font-size: 0.8rem;"></i>{% endif %}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">{{ org.follower_count }} followers</small>
+                                        {% if org.description %}
+                                        <small class="text-muted d-block">{{ org.description|truncatewords:10 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if org.id in user_following_orgs %}
+                                <button class="btn btn-sm btn-outline-secondary unfollow-org-btn" data-org-id="{{ org.id }}">
+                                    Following
+                                </button>
+                                {% else %}
+                                <button class="btn btn-sm btn-primary follow-org-btn" data-org-id="{{ org.id }}">
+                                    Follow
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="bi bi-star"></i></div>
+                        <h5>Explore VoxPoll</h5>
+                        <p class="text-muted">Search for users and organizations to follow</p>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="sidebar-card">
+                    <h6 class="sidebar-title">Search Tips</h6>
+                    <ul class="tips-list">
+                        <li>Search by username to find users</li>
+                        <li>Search by organization name</li>
+                        <li>Use keywords from descriptions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-wrapper {
+        padding-top: calc(var(--nav-h) + 20px);
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .search-header {
+        margin-bottom: 32px;
+    }
+
+    .search-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        font-size: 1rem !important;
+        padding: 12px 16px 12px 40px !important;
+        background: var(--surface2) !important;
+        border: 2px solid var(--border) !important;
+    }
+
+    .search-input:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(110,231,183,0.15) !important;
+    }
+
+    .input-group-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        z-index: 10;
+    }
+
+    .results-section {
+        margin-bottom: 32px;
+    }
+
+    .results-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .result-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        transition: all 0.2s;
+    }
+
+    .result-item:hover {
+        border-color: var(--surface3);
+        background: rgba(110,231,183,0.02);
+    }
+
+    .result-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--surface2);
+        flex-shrink: 0;
+    }
+
+    .result-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .result-info h6 a {
+        color: var(--text) !important;
+        text-decoration: none;
+    }
+
+    .result-info h6 a:hover {
+        color: var(--accent) !important;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent);
+        color: #0D0D0D;
+        font-weight: 700;
+    }
+
+    .sidebar-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        padding: 20px;
+    }
+
+    .sidebar-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+    }
+
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tips-list li {
+        padding: 8px 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .tips-list li:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<script>
+document.querySelectorAll('.follow-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const userId = this.dataset.userId;
+        fetch(`/follow/user/${userId}/`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    this.textContent = 'Following';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-secondary', 'unfollow-btn');
+                    this.dataset.userId = userId;
+                }
+            });
+    });
+});
+
+document.querySelectorAll('.follow-org-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const orgId = this.dataset.orgId;
+        fetch(`/follow/organization/${orgId}/`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    this.textContent = 'Following';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-secondary', 'unfollow-org-btn');
+                }
+            });
+    });
+});
+</script>
+{% endblock %}

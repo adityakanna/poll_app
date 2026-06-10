@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block title %}{{ organization.name }} — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="org-profile-wrapper">
+    <div class="container">
+        <div class="org-profile-header">
+            <div class="org-cover"></div>
+            <div class="org-info">
+                <div class="org-logo">
+                    {% if organization.logo %}
+                        <img src="{{ organization.logo.url }}" alt="{{ organization.name }}">
+                    {% else %}
+                        <div class="logo-placeholder">{{ organization.name|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="org-details">
+                    <h1>
+                        {{ organization.name }}
+                        {% if organization.verified %}<i class="bi bi-check-circle-fill" style="color: var(--accent);"></i>{% endif %}
+                    </h1>
+                    <p class="org-description">{{ organization.description }}</p>
+                    <div class="org-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ org_polls.count }}</div>
+                            <div class="stat-label">Polls</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ follower_count }}</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ following_count }}</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-actions">
+                    {% if can_edit %}
+                    <a href="{% url 'edit_user_profile' %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2"></i>Edit Organization
+                    </a>
+                    {% else %}
+                    {% if is_following %}
+                    <button class="btn btn-outline-secondary unfollow-org-btn" data-org-id="{{ organization.id }}">
+                        <i class="bi bi-check me-2"></i>Following
+                    </button>
+                    {% else %}
+                    <button class="btn btn-primary follow-org-btn" data-org-id="{{ organization.id }}">
+                        <i class="bi bi-plus me-2"></i>Follow
+                    </button>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Organization's Polls -->
+        <div class="mt-5">
+            <h3>Active Polls</h3>
+            {% if org_polls %}
+            <div class="row g-3 mt-3">
+                {% for poll in org_polls %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="poll-card">
+                        <div class="poll-question">{{ poll.question }}</div>
+                        <div class="poll-meta">
+                            <span class="poll-meta-item"><i class="bi bi-people"></i>{{ poll.total_votes }} votes</span>
+                            <span class="poll-meta-item"><i class="bi bi-list-ul"></i>{{ poll.options.count }} options</span>
+                        </div>
+                        <a href="{% url 'results' poll.id %}" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-bar-chart me-1"></i>View Results
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No polls created yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .org-profile-wrapper {
+        padding-top: calc(var(--nav-h));
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .org-profile-header {
+        margin-bottom: 40px;
+    }
+
+    .org-cover {
+        height: 200px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border-radius: 12px 12px 0 0;
+        margin-bottom: -60px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .org-info {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 40px;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+    }
+
+    .org-logo {
+        width: 120px;
+        height: 120px;
+        border-radius: 12px;
+        border: 4px solid var(--brand);
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--surface2);
+    }
+
+    .org-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .logo-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent);
+        color: #0D0D0D;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .org-details h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .org-description {
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        max-width: 500px;
+    }
+
+    .org-stats {
+        display: flex;
+        gap: 30px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .org-actions {
+        margin-left: auto;
+    }
+</style>
+
+<script>
+document.querySelectorAll('.follow-org-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const orgId = this.dataset.orgId;
+        fetch(`/follow/organization/${orgId}/`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    this.textContent = 'Following';
+                    this.innerHTML = '<i class="bi bi-check me-2"></i>Following';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-secondary');
+                    location.reload();
+                }
+            });
+    });
+});
+
+document.querySelectorAll('.unfollow-org-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const orgId = this.dataset.orgId;
+        fetch(`/unfollow/organization/${orgId}/`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                location.reload();
+            });
+    });
+});
+</script>
+{% endblock %}

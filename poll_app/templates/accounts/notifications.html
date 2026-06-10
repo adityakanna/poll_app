@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — VoxPoll{% endblock %}
+
+{% block content %}
+<style>
+    .notifications-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .notifications-header h1 {
+        font-size: 2rem;
+        color: #F9FAFB;
+        font-weight: 800;
+    }
+
+    .notification-count {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .notifications-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: #10B981;
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #10B981;
+        border: 2px solid #10B981;
+    }
+
+    .btn-secondary:hover {
+        background: #10B981;
+        color: #0D0D0D;
+    }
+
+    .notification-item {
+        background: rgba(17, 24, 39, 0.8);
+        border-left: 4px solid #10B981;
+        padding: 20px;
+        margin-bottom: 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-item:hover {
+        background: rgba(17, 24, 39, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .notification-item.unread {
+        background: rgba(16, 185, 129, 0.1);
+        border-left-color: #10B981;
+    }
+
+    .notification-item.read {
+        opacity: 0.7;
+        border-left-color: #4B5563;
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .notification-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #F9FAFB;
+    }
+
+    .notification-type {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(56, 189, 248, 0.2);
+        color: #38BDF8;
+    }
+
+    .notification-message {
+        color: #D1D5DB;
+        margin-bottom: 12px;
+        line-height: 1.6;
+    }
+
+    .notification-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #9CA3AF;
+    }
+
+    .notification-time {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(16, 185, 129, 0.2);
+        border-radius: 50%;
+        color: #10B981;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9CA3AF;
+    }
+
+    .empty-state-icon {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        color: #4B5563;
+    }
+
+    .empty-state h3 {
+        color: #D1D5DB;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .notification-type.follow {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+    }
+
+    .notification-type.poll {
+        background: rgba(56, 189, 248, 0.2);
+        color: #38BDF8;
+    }
+
+    .notification-type.account {
+        background: rgba(247, 144, 9, 0.2);
+        color: #F79009;
+    }
+
+    @media (max-width: 768px) {
+        .notifications-container {
+            margin: 20px auto;
+        }
+
+        .notifications-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .notifications-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .notification-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notifications-actions {
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h1>
+            <i class="bi bi-bell-fill me-2"></i>Notifications
+        </h1>
+        <div class="notification-count">
+            {{ unread_count }} unread
+        </div>
+    </div>
+
+    {% if unread_count > 0 %}
+        <div class="notifications-actions">
+            <form method="post" style="flex: 1;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="mark_all_read">
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                    <i class="bi bi-check2-all me-2"></i>Mark all as read
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if notifications %}
+        <div class="notifications-list">
+            {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% else %}read{% endif %}">
+                    <div class="notification-header">
+                        <div>
+                            <h3 class="notification-title">{{ notification.title }}</h3>
+                            <span class="notification-type {% if 'follow' in notification.notification_type %}follow{% elif 'poll' in notification.notification_type %}poll{% else %}account{% endif %}">
+                                {{ notification.get_notification_type_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <p class="notification-message">{{ notification.message }}</p>
+                    
+                    <div class="notification-meta">
+                        <span class="notification-time">
+                            <i class="bi bi-clock me-1"></i>
+                            {% now "U" as current_time %}
+                            {% if notification.created_at.timestamp > current_time|add:"-3600" %}
+                                Less than an hour ago
+                            {% elif notification.created_at.timestamp > current_time|add:"-86400" %}
+                                Today
+                            {% else %}
+                                {{ notification.created_at|date:"M d, Y" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h3>No notifications yet</h3>
+            <p>When someone follows you or interacts with your polls,<br>you'll see notifications here.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

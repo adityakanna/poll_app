@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'images/Screenshot 2026-06-10 033505.png' %}" type="image/png">
     <style>
         :root {
             --brand: #0D0D0D;
@@ -58,6 +60,18 @@
             font-size: 1.4rem;
             color: var(--text) !important;
             letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand img.site-logo {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
         }
 
         .navbar-brand span {
@@ -79,7 +93,13 @@
             background: var(--surface2);
         }
 
-        .nav-link i { margin-right: 6px; }
+        .nav-link i { margin-right: 6px; 
+                      color: white;
+        }
+        
+        .text-muted small me-2{
+            color: white;
+        }
 
         .btn-nav-cta {
             background: var(--accent);
@@ -657,18 +677,31 @@
 </head>
 <body>
 
-{% if user.is_authenticated %}
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'dashboard' %}">Vox<span>Poll</span></a>
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/Screenshot 2026-06-10 033505.png' %}" alt="VoxPoll logo" class="site-logo">
+            <span>Vox<span>Poll</span></span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
+            {% if user.is_authenticated %}
             <ul class="navbar-nav me-auto ms-3 gap-1">
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                         <i class="bi bi-house"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" href="{% url 'feed' %}">
+                        <i class="bi bi-rss"></i>Feed
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}" href="{% url 'search' %}">
+                        <i class="bi bi-search"></i>Search
                     </a>
                 </li>
                 <li class="nav-item">
@@ -687,9 +720,12 @@
                     </a>
                 </li>
             </ul>
+            {% endif %}
+            
             <div class="d-flex align-items-center gap-2">
-                <span class="text-muted small me-2">
-                    <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                {% if user.is_authenticated %}
+                <span class="text-muted small me-2" style="color: white !important;">
+                    <i class="bi bi-person-circle me-1" style="color: white;"></i>{{ user.username }}
                 </span>
                 <a href="{% url 'create_poll' %}" class="btn btn-nav-cta btn-sm">
                     <i class="bi bi-plus-lg me-1"></i>Create Poll
@@ -697,11 +733,18 @@
                 <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-nav-cta btn-sm">
+                    <i class="bi bi-person-plus me-1"></i>Register
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
 </nav>
-{% endif %}
 
 <!-- Toast Container -->
 <div class="toast-container">
@@ -719,7 +762,7 @@
     {% endfor %}
 </div>
 
-<div class="{% if user.is_authenticated %}main-content{% endif %}">
+<div class="{% if user.is_authenticated %}main-content{% else %}main-content{% endif %}">
     <div class="container">
         {% block content %}{% endblock %}
     </div>
@@ -732,6 +775,14 @@
         setTimeout(() => t.remove(), 5000);
     });
 </script>
+<script>
+    window.INACTIVITY_MONITOR_CONFIG = {
+        enabled: {{ user.is_authenticated|yesno:'true,false' }},
+        timeoutMs: 15 * 60 * 1000,
+        logoutUrl: "{% url 'logout' %}?inactive=1",
+    };
+</script>
+<script src="{% static 'js/inactivity-monitor.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

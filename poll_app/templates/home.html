@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% block title %}
+    VoxPoll — Polls & Voting
+{% endblock %}
+
+{% block content %}
+<div class="home-wrapper">
+    <div class="home-container">
+        <!-- Left Sidebar - Auth Forms -->
+        <div class="auth-sidebar">
+            {% if not user.is_authenticated %}
+                <div class="auth-tabs">
+                    <button class="auth-tab-btn active" data-tab="login" onclick="switchTab('login', event)">Sign In</button>
+                    <button class="auth-tab-btn" data-tab="register" onclick="switchTab('register', event)">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div class="auth-form-container" id="login-tab">
+                    <h3 class="auth-form-title">Welcome Back</h3>
+                    {% if login_error %}
+                    <div class="alert alert-danger mb-3">{{ login_error }}</div>
+                    {% endif %}
+                    <form method="POST" action="{% url 'home' %}" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="login">
+                        <div class="mb-3">
+                            <label class="form-label">Username or Email</label>
+                            <input type="text" name="username" class="form-control" placeholder="Enter username or email" value="" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter your password" value="" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div class="auth-form-container" id="register-tab" style="display: none;">
+                    <h3 class="auth-form-title">Create Account</h3>
+                    {% if register_error %}
+                    <div class="alert alert-danger mb-3">{{ register_error }}</div>
+                    {% endif %}
+                    <form method="POST" action="{% url 'home' %}" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="register">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="reg_username" class="form-control" placeholder="Choose a username" value="" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="your@email.com" value="" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password1" class="form-control" placeholder="Create a strong password" value="" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" name="password2" class="form-control" placeholder="Repeat your password" value="" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-person-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="auth-sidebar-content">
+                    <div class="user-welcome">
+                        <h3>Welcome back!</h3>
+                        <p class="text-muted mb-3">{{ user.username }}</p>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="quick-stats">
+                        <div class="stat-mini">
+                            <div class="stat-mini-value">{{ user_poll_count }}</div>
+                            <div class="stat-mini-label">Your Polls</div>
+                        </div>
+                        <div class="stat-mini">
+                            <div class="stat-mini-value">{{ user_vote_count }}</div>
+                            <div class="stat-mini-label">Votes Cast</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary w-100 mt-3">
+                        <i class="bi bi-arrow-right me-2"></i>Go to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Content - Main Area -->
+        <div class="home-main">
+            <div class="home-header">
+                <div>
+                    <h1 class="page-title">Explore Polls</h1>
+                    <p class="page-subtitle">Vote on topics you care about</p>
+                </div>
+                {% if user.is_authenticated %}
+                <a href="{% url 'create_poll' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>Create Poll
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Stats -->
+            {% if user.is_authenticated %}
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ total_polls }}</div>
+                        <div class="stat-label">Total Polls</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user_poll_count }}</div>
+                        <div class="stat-label">Your Polls</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user_vote_count }}</div>
+                        <div class="stat-label">Votes Cast</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ total_polls|add:user_vote_count }}</div>
+                        <div class="stat-label">Activity</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Polls List -->
+            <div>
+                <h2 class="mb-3" style="font-size: 1.2rem; margin: 0">Recent Polls</h2>
+            </div>
+
+            {% if poll_data %}
+            <div class="row g-3">
+                {% for item in poll_data|slice:":9" %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="poll-card h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="poll-question">{{ item.poll.question }}</div>
+                            {% if item.user_voted %}
+                            <span class="voted-badge ms-2 flex-shrink-0"><i class="bi bi-check2-circle"></i>Voted</span>
+                            {% endif %}
+                        </div>
+                        <div class="poll-meta">
+                            <span class="poll-meta-item"><i class="bi bi-person"></i>{{ item.poll.created_by.username }}</span>
+                            <span class="poll-meta-item"><i class="bi bi-people"></i>{{ item.total_votes }} vote{{ item.total_votes|pluralize }}</span>
+                            <span class="poll-meta-item"><i class="bi bi-clock"></i>{{ item.poll.created_at|date:"M d" }}</span>
+                            <span class="poll-meta-item"><i class="bi bi-list-ul"></i>{{ item.poll.options.count }} options</span>
+                        </div>
+                        <div class="d-flex gap-2 mt-auto">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'vote' item.poll.id %}" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="bi bi-hand-index me-1"></i>{% if item.user_voted %}Change Vote{% else %}Vote{% endif %}
+                            </a>
+                            {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="bi bi-hand-index me-1"></i>Vote
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'results' item.poll.id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-bar-chart-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-bar-chart"></i></div>
+                <h5>No polls yet</h5>
+                <p class="text-muted small">Be the first to create a poll!</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'create_poll' %}" class="btn btn-primary mt-2">Create First Poll</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .home-wrapper {
+        padding-top: calc(var(--nav-h) + 20px);
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .home-container {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Auth Sidebar */
+    .auth-sidebar {
+        position: sticky;
+        top: calc(var(--nav-h) + 20px);
+        height: fit-content;
+    }
+
+    .auth-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .auth-tab-btn {
+        padding: 10px 16px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+    }
+
+    .auth-tab-btn:hover {
+        border-color: var(--surface3);
+        color: var(--text);
+    }
+
+    .auth-tab-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0D0D0D;
+    }
+
+    .auth-form-container {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .auth-form-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--text);
+    }
+
+    .auth-sidebar-content {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .user-welcome h3 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 16px 0;
+    }
+
+    .stat-mini {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .stat-mini-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .stat-mini-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 4px;
+    }
+
+    /* Main Content */
+    .home-main {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .home-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .home-container {
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .home-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .auth-sidebar {
+            position: static;
+            order: 2;
+        }
+
+        .home-main {
+            order: 1;
+        }
+    }
+</style>
+
+<script>
+    function switchTab(tab, event) {
+        event.preventDefault();
+        
+        // Hide all tabs
+        document.querySelectorAll('.auth-form-container').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.auth-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab
+        document.getElementById(tab + '-tab').style.display = 'block';
+        
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+</script>
+
+        .home-main {
+            order: 1;
+        }
+
+        .auth-tabs {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+
+<script>
+    function switchTab(tab, event) {
+        event.preventDefault();
+        
+        // Hide all tabs
+        document.querySelectorAll('.auth-form-container').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.auth-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab
+        document.getElementById(tab + '-tab').style.display = 'block';
+        
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Following — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="following-wrapper">
+    <div class="container">
+        <div class="back-link mb-4">
+            <a href="{% url 'user_profile' profile_user.id %}">
+                <i class="bi bi-arrow-left me-2"></i>{{ profile_user.username }}'s Profile
+            </a>
+        </div>
+
+        <h2>Following ({{ following_count }})</h2>
+
+        {% if following %}
+        <div class="following-list">
+            {% for follow in following %}
+            <div class="following-item">
+                <div class="d-flex align-items-center gap-3">
+                    {% if follow.following_user %}
+                    <div class="following-avatar">
+                        {% if follow.following_user.profile.profile_picture %}
+                            <img src="{{ follow.following_user.profile.profile_picture.url }}" alt="{{ follow.following_user.username }}">
+                        {% else %}
+                            <div class="avatar-placeholder">{{ follow.following_user.username|first }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h6 class="mb-0">
+                            <a href="{% url 'user_profile' follow.following_user.id %}">{{ follow.following_user.username }}</a>
+                        </h6>
+                        <small class="text-muted">User • Following since {{ follow.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% elif follow.following_organization %}
+                    <div class="following-avatar">
+                        {% if follow.following_organization.logo %}
+                            <img src="{{ follow.following_organization.logo.url }}" alt="{{ follow.following_organization.name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">{{ follow.following_organization.name|first }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h6 class="mb-0">
+                            <a href="{% url 'organization_profile' follow.following_organization.id %}">
+                                {{ follow.following_organization.name }}
+                                {% if follow.following_organization.verified %}<i class="bi bi-check-circle-fill" style="color: var(--accent); font-size: 0.8rem;"></i>{% endif %}
+                            </a>
+                        </h6>
+                        <small class="text-muted">Organization • Following since {{ follow.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="text-muted">Not following anyone yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .following-wrapper {
+        padding-top: calc(var(--nav-h) + 20px);
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .back-link a {
+        color: var(--accent) !important;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .back-link a:hover {
+        text-decoration: underline;
+    }
+
+    .following-list {
+        max-width: 600px;
+        margin-top: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .following-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+
+    .following-item:hover {
+        border-color: var(--surface3);
+        background: rgba(110,231,183,0.02);
+    }
+
+    .following-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--surface2);
+    }
+
+    .following-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent);
+        color: #0D0D0D;
+        font-weight: 700;
+    }
+
+    .following-item h6 a {
+        color: var(--text) !important;
+        text-decoration: none;
+    }
+
+    .following-item h6 a:hover {
+        color: var(--accent) !important;
+    }
+</style>
+{% endblock %}

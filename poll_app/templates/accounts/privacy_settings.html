@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% block title %}Privacy Settings — VoxPoll{% endblock %}
+
+{% block content %}
+<style>
+    .privacy-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .privacy-header {
+        margin-bottom: 40px;
+    }
+
+    .privacy-header h1 {
+        font-size: 2.5rem;
+        color: #F9FAFB;
+        margin-bottom: 10px;
+        font-weight: 800;
+    }
+
+    .privacy-header p {
+        color: #9CA3AF;
+        font-size: 1.1rem;
+    }
+
+    .settings-section {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .settings-section h2 {
+        font-size: 1.5rem;
+        color: #F9FAFB;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(16, 185, 129, 0.3);
+        font-weight: 700;
+    }
+
+    .section-description {
+        color: #9CA3AF;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #D1D5DB;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(31, 41, 55, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: #F9FAFB;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #10B981;
+        background: rgba(31, 41, 55, 1);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-control textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(31, 41, 55, 0.5);
+    }
+
+    .radio-option:hover {
+        border-color: #10B981;
+        background: rgba(31, 41, 55, 0.8);
+    }
+
+    .radio-option input[type="radio"] {
+        margin-right: 12px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+
+    .radio-label {
+        flex: 1;
+        cursor: pointer;
+    }
+
+    .radio-label strong {
+        color: #F9FAFB;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .radio-label small {
+        color: #9CA3AF;
+        display: block;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(31, 41, 55, 0.5);
+    }
+
+    .checkbox-item:hover {
+        border-color: #10B981;
+        background: rgba(31, 41, 55, 0.8);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        margin-right: 12px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+
+    .checkbox-label {
+        flex: 1;
+        cursor: pointer;
+        color: #D1D5DB;
+        font-weight: 500;
+    }
+
+    .privacy-info {
+        background: rgba(16, 185, 129, 0.1);
+        border-left: 4px solid #10B981;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+
+    .privacy-info strong {
+        color: #10B981;
+    }
+
+    .privacy-info p {
+        color: #D1D5DB;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: #10B981;
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #10B981;
+        border: 2px solid #10B981;
+    }
+
+    .btn-secondary:hover {
+        background: #10B981;
+        color: #0D0D0D;
+    }
+
+    .profile-preview {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(56, 189, 248, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        border: 2px solid rgba(56, 189, 248, 0.5);
+    }
+
+    .profile-picture img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-info p {
+        color: #9CA3AF;
+        margin: 0;
+    }
+
+    .success-message {
+        background: rgba(16, 185, 129, 0.1);
+        border-left: 4px solid #10B981;
+        padding: 15px;
+        border-radius: 6px;
+        color: #10B981;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .privacy-container {
+            margin: 20px auto;
+        }
+
+        .privacy-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .settings-section {
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .profile-preview {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="privacy-container">
+    <div class="privacy-header">
+        <h1>
+            <i class="bi bi-shield-lock me-2"></i>Privacy Settings
+        </h1>
+        <p>Control how your information is shared with other users on VoxPoll.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="success-message" style="border-left-color: {% if 'success' in message.tags %}#10B981{% else %}#EF4444{% endif %}; background: {% if 'success' in message.tags %}rgba(16, 185, 129, 0.1){% else %}rgba(239, 68, 68, 0.1){% endif %}; color: {% if 'success' in message.tags %}#10B981{% else %}#EF4444{% endif %};">
+                <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Profile Information Section -->
+        <div class="settings-section">
+            <h2>
+                <i class="bi bi-person-fill me-2"></i>Profile Information
+            </h2>
+            <p class="section-description">
+                Only profile picture and bio are visible to other users. The rest of your account information remains private.
+            </p>
+
+            <div class="profile-preview">
+                <div class="profile-picture">
+                    {% if user_profile.profile_picture %}
+                        <img src="{{ user_profile.profile_picture.url }}" alt="Profile picture">
+                    {% else %}
+                        <i class="bi bi-person"></i>
+                    {% endif %}
+                </div>
+                <div class="profile-info">
+                    <strong style="color: #F9FAFB; display: block; margin-bottom: 5px;">{{ request.user.username }}</strong>
+                    <p>{{ request.user.email }}</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_bio">Bio</label>
+                {{ profile_form.bio }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_profile_picture">Profile Picture</label>
+                {{ profile_form.profile_picture }}
+                <small style="color: #9CA3AF; display: block; margin-top: 8px;">Recommended: Square image, at least 200x200px</small>
+            </div>
+        </div>
+
+        <!-- Account Visibility Section -->
+        <div class="settings-section">
+            <h2>
+                <i class="bi bi-eye-fill me-2"></i>Account Visibility
+            </h2>
+            <p class="section-description">
+                Choose whether your account is discoverable and viewable by other users.
+            </p>
+
+            <div class="form-group">
+                <div class="radio-group">
+                    {% for value, label in privacy_form.account_visibility.field.choices %}
+                        <label class="radio-option">
+                            <input type="radio" name="account_visibility" value="{{ value }}" 
+                                {% if privacy_form.account_visibility.value == value %}checked{% endif %}>
+                            <div class="radio-label">
+                                <strong>{% if value == 'public' %}<i class="bi bi-globe me-2" style="color: #10B981;"></i>Public Account{% else %}<i class="bi bi-lock me-2" style="color: #38BDF8;"></i>Private Account{% endif %}</strong>
+                                <small>
+                                    {% if value == 'public' %}
+                                        Everyone can find and see your profile
+                                    {% else %}
+                                        Only your followers can see your profile
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Followers & Following Visibility -->
+        <div class="settings-section">
+            <h2>
+                <i class="bi bi-people-fill me-2"></i>Followers & Following
+            </h2>
+            <p class="section-description">
+                Your followers and following lists are private by default. This is recommended for your privacy.
+            </p>
+
+            <div class="form-group">
+                <label for="id_followers_visibility">Who can see your followers?</label>
+                {{ privacy_form.followers_visibility }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_following_visibility">Who can see who you follow?</label>
+                {{ privacy_form.following_visibility }}
+            </div>
+
+            <div class="privacy-info">
+                <strong>💡 Privacy Tip:</strong>
+                <p>Keeping these private means other users cannot see who follows you or who you follow.</p>
+            </div>
+        </div>
+
+        <!-- Activity Visibility -->
+        <div class="settings-section">
+            <h2>
+                <i class="bi bi-graph-up me-2"></i>Activity Visibility
+            </h2>
+            <p class="section-description">
+                Control who can see your voting and poll creation activities. Recommended: Keep hidden for maximum privacy.
+            </p>
+
+            <div class="form-group">
+                <label for="id_voting_activity_visibility">Voting Activity Visibility</label>
+                {{ privacy_form.voting_activity_visibility }}
+                <small style="color: #9CA3AF; display: block; margin-top: 8px;">⚠️ Recommended: Hidden From Everyone - Your votes will never be visible to others</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_poll_activity_visibility">Poll Creation Activity Visibility</label>
+                {{ privacy_form.poll_activity_visibility }}
+            </div>
+
+            <div class="privacy-info">
+                <strong>🔒 Privacy First:</strong>
+                <p>Your voting activity is completely private by default. Other users can only see aggregate poll statistics, never who voted for what.</p>
+            </div>
+        </div>
+
+        <!-- Notification Preferences -->
+        <div class="settings-section">
+            <h2>
+                <i class="bi bi-bell-fill me-2"></i>Notification Preferences
+            </h2>
+            <p class="section-description">
+                Control which notifications you receive. You'll only be notified about activities relevant to your account.
+            </p>
+
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    {{ privacy_form.show_follower_notifications }}
+                    <span class="checkbox-label">
+                        <strong>Follower Notifications</strong> - Get notified when someone follows you
+                    </span>
+                </label>
+
+                <label class="checkbox-item">
+                    {{ privacy_form.show_poll_notifications }}
+                    <span class="checkbox-label">
+                        <strong>Poll Notifications</strong> - Get notified about polls you created
+                    </span>
+                </label>
+
+                <label class="checkbox-item">
+                    {{ privacy_form.show_activity_notifications }}
+                    <span class="checkbox-label">
+                        <strong>Activity Notifications</strong> - Get notified about account activities
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-2"></i>Save Privacy Settings
+            </button>
+        </div>
+    </form>
+
+    <!-- Additional Privacy Information -->
+    <div class="settings-section" style="margin-top: 40px;">
+        <h2>
+            <i class="bi bi-info-circle-fill me-2"></i>Privacy Information
+        </h2>
+        <p style="color: #D1D5DB; line-height: 1.8;">
+            <strong style="color: #10B981;">VoxPoll is privacy-first.</strong> Here's what you should know:
+        </p>
+        <ul style="color: #D1D5DB; line-height: 1.8; margin-left: 20px; margin-top: 15px;">
+            <li>Your voting history is never visible to other users</li>
+            <li>Poll creators only see anonymous vote counts, not who voted</li>
+            <li>Your followers and following lists are private by default</li>
+            <li>Notifications are only sent for activities relevant to your account</li>
+            <li>Your profile information is only what you choose to share</li>
+            <li>You can change these settings at any time</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

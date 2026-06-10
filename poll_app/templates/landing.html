@@ -1,0 +1,770 @@
+{% extends 'base.html' %}
+{% block title %}VoxPoll - Ask. Vote. Discover. Your Private Polling Platform{% endblock %}
+
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #0D0D0D;
+        color: #F9FAFB;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    /* Hide base navbar on landing page */
+    .navbar {
+        display: none !important;
+    }
+
+    /* Enhanced Navigation */
+    .navbar-enhanced {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(13, 13, 13, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        padding: 1rem 0;
+    }
+
+    .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .nav-logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #10B981 0%, #38BDF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-decoration: none;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 40px;
+        list-style: none;
+    }
+
+    .nav-links a {
+        color: #D1D5DB;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+        color: #10B981;
+    }
+
+    .nav-auth {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .nav-auth a {
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .nav-signin {
+        color: #10B981;
+        border: 2px solid #10B981;
+    }
+
+    .nav-signin:hover {
+        background: #10B981;
+        color: #0D0D0D;
+    }
+
+    .nav-register {
+        background: #10B981;
+        color: #0D0D0D;
+    }
+
+    .nav-register:hover {
+        background: #059669;
+    }
+
+    /* Hero Section */
+    .landing-hero {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0D0D0D 0%, #1a1a2e 50%, #16213e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 100px 40px 60px;
+    }
+
+    .landing-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .hero-container {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 1000px;
+    }
+
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 30px;
+        letter-spacing: -2px;
+    }
+
+    .hero-title span {
+        background: linear-gradient(90deg, #10B981 0%, #38BDF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.4rem;
+        color: #D1D5DB;
+        margin-bottom: 50px;
+        line-height: 1.8;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 16px 40px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: #10B981;
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #10B981;
+        border: 2px solid #10B981;
+    }
+
+    .btn-secondary:hover {
+        background: #10B981;
+        color: #0D0D0D;
+        transform: translateY(-3px);
+    }
+
+    /* Features Section */
+    .features-section {
+        background: #0D0D0D;
+        padding: 80px 40px;
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .section-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+    .section-subtitle {
+        font-size: 1.1rem;
+        color: #9CA3AF;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 16px;
+        padding: 40px;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        border-color: rgba(16, 185, 129, 0.5);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(56, 189, 248, 0.1);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #10B981;
+    }
+
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .feature-description {
+        color: #9CA3AF;
+        line-height: 1.6;
+    }
+
+    /* Dashboard Preview Section */
+    .dashboard-preview {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(56, 189, 248, 0.05) 100%);
+        padding: 80px 40px;
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+
+    .stat-card {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(16, 185, 129, 0.5);
+        background: rgba(17, 24, 39, 1);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #10B981 0%, #38BDF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        color: #9CA3AF;
+        font-size: 1rem;
+    }
+
+    .recent-activity {
+        margin-top: 40px;
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+    }
+
+    .activity-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .activity-list {
+        list-style: none;
+    }
+
+    .activity-item {
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        color: #D1D5DB;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Security Section */
+    .security-section {
+        background: #0D0D0D;
+        padding: 80px 40px;
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    .security-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .security-item {
+        text-align: center;
+    }
+
+    .security-icon {
+        font-size: 2rem;
+        color: #38BDF8;
+        margin-bottom: 15px;
+    }
+
+    .security-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .security-description {
+        color: #9CA3AF;
+        font-size: 0.95rem;
+    }
+
+    /* Footer */
+    .footer {
+        background: #111827;
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+        padding: 60px 40px;
+    }
+
+    .footer-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+
+    .footer-column h4 {
+        font-size: 1rem;
+        margin-bottom: 20px;
+        color: #10B981;
+    }
+
+    .footer-column ul {
+        list-style: none;
+    }
+
+    .footer-column ul li {
+        margin-bottom: 12px;
+    }
+
+    .footer-column a {
+        color: #9CA3AF;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .footer-column a:hover {
+        color: #10B981;
+    }
+
+    .footer-bottom {
+        border-top: 1px solid rgba(56, 189, 248, 0.1);
+        padding-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .footer-copyright {
+        color: #9CA3AF;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 20px;
+    }
+
+    .social-links a {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(56, 189, 248, 0.1);
+        border-radius: 50%;
+        color: #38BDF8;
+        transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+        background: #38BDF8;
+        color: #0D0D0D;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-links {
+            display: none;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .footer-bottom {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<!-- Enhanced Navigation -->
+<nav class="navbar-enhanced">
+    <div class="nav-container">
+        <a href="{% url 'home' %}" class="nav-logo">
+            <i class="bi bi-bar-chart-fill me-2"></i>VoxPoll
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+        <div class="nav-auth">
+            <a href="{% url 'login' %}" class="nav-signin">Sign In</a>
+            <a href="{% url 'register' %}" class="nav-register">Register</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="landing-hero" id="home">
+    <div class="hero-container">
+        <h1 class="hero-title">
+            Ask. <span>Vote.</span> <span>Discover.</span>
+        </h1>
+        <p class="hero-subtitle">
+            Create polls, share opinions, and discover what your community thinks.
+        </p>
+        <div class="hero-buttons">
+            <a href="{% url 'register' %}" class="btn btn-primary">
+                <i class="bi bi-rocket-fill"></i>Get Started
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-right"></i>Explore Polls
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="section-header">
+        <h2 class="section-title">Your Private Polling Platform</h2>
+        <p class="section-subtitle">
+            Enjoy a completely personalized and secure experience where your data stays yours.
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <h3 class="feature-title">Complete Privacy</h3>
+            <p class="feature-description">
+                Your voting history, profile data, and personal statistics are never visible to other users. Full isolation between accounts.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <h3 class="feature-title">Personal Dashboard</h3>
+            <p class="feature-description">
+                View your own polls, voting history, activity logs, and personalized recommendations in one place.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-lightning-fill"></i>
+            </div>
+            <h3 class="feature-title">Smart Recommendations</h3>
+            <p class="feature-description">
+                Discover polls based on your interests and voting history. Personalized suggestions tailored to you.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <h3 class="feature-title">Rich Analytics</h3>
+            <p class="feature-description">
+                Track poll performance with detailed engagement stats. Only you can see your poll's analytics.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-eye-slash-fill"></i>
+            </div>
+            <h3 class="feature-title">Anonymous Voting</h3>
+            <p class="feature-description">
+                Voters remain anonymous by default. Poll creators only see vote counts, not voter identities.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-bell-fill"></i>
+            </div>
+            <h3 class="feature-title">Smart Notifications</h3>
+            <p class="feature-description">
+                Real-time alerts for relevant activities only. See updates on polls you created or participated in.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Dashboard Preview -->
+<section class="dashboard-preview">
+    <div class="dashboard-container">
+        <div class="section-header">
+            <h2 class="section-title">Your Personal Dashboard</h2>
+            <p class="section-subtitle">
+                A comprehensive view of your polling activity and personalized recommendations.
+            </p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Polls Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Polls Participated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Votes Cast</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Profile Views</div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3 class="activity-title">Your Recent Activity</h3>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <i class="bi bi-check-circle-fill me-2" style="color: #10B981;"></i>
+                    You created a new poll: "What's your favorite programming language?"
+                </li>
+                <li class="activity-item">
+                    <i class="bi bi-hand-thumbs-up-fill me-2" style="color: #38BDF8;"></i>
+                    You voted on: "Best Python Framework for Web Development"
+                </li>
+                <li class="activity-item">
+                    <i class="bi bi-arrow-repeat me-2" style="color: #10B981;"></i>
+                    Your poll received new votes: "Favorite Tech Stack 2024"
+                </li>
+                <li class="activity-item">
+                    <i class="bi bi-star-fill me-2" style="color: #38BDF8;"></i>
+                    Sign up to see your personalized activity feed
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Security Features -->
+<section class="security-section" id="security">
+    <div class="section-header">
+        <h2 class="section-title">Enterprise-Grade Security</h2>
+        <p class="section-subtitle">
+            Your data is protected with industry-leading security standards.
+        </p>
+    </div>
+
+    <div class="security-grid">
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-key-fill"></i></div>
+            <h4 class="security-title">Secure Authentication</h4>
+            <p class="security-description">Session-based and JWT authentication with secure password hashing.</p>
+        </div>
+
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-shield-check"></i></div>
+            <h4 class="security-title">Data Isolation</h4>
+            <p class="security-description">Complete user data isolation. One user cannot access another's data via URLs or APIs.</p>
+        </div>
+
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-lock-fill"></i></div>
+            <h4 class="security-title">Encrypted Storage</h4>
+            <p class="security-description">Sensitive user data encrypted at rest with industry-standard algorithms.</p>
+        </div>
+
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <h4 class="security-title">CSRF & XSS Protection</h4>
+            <p class="security-description">Comprehensive protection against common web vulnerabilities.</p>
+        </div>
+
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-shield-slash"></i></div>
+            <h4 class="security-title">Role-Based Access</h4>
+            <p class="security-description">Granular permissions for Admin, Moderator, and Registered User roles.</p>
+        </div>
+
+        <div class="security-item">
+            <div class="security-icon"><i class="bi bi-clock-history"></i></div>
+            <h4 class="security-title">Activity Logging</h4>
+            <p class="security-description">Secure session management with comprehensive audit trails.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#security">Security</a></li>
+                    <li><a href="{% url 'login' %}">Sign In</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                    <li><a href="#cookies">Cookie Policy</a></li>
+                    <li><a href="#compliance">Compliance</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#help">Help Center</a></li>
+                    <li><a href="#docs">Documentation</a></li>
+                    <li><a href="#status">Status Page</a></li>
+                    <li><a href="#contact">Contact Support</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copyright">
+                &copy; 2026 VoxPoll. All rights reserved. | Privacy First Polling Platform
+            </div>
+            <div class="social-links">
+                <a href="#twitter" title="Twitter"><i class="bi bi-twitter"></i></a>
+                <a href="#linkedin" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                <a href="#github" title="GitHub"><i class="bi bi-github"></i></a>
+                <a href="#facebook" title="Facebook"><i class="bi bi-facebook"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

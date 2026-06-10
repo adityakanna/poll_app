@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% block title %}Feed — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="feed-wrapper">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Main Feed -->
+            <div class="col-lg-8">
+                {% if feed_items %}
+                <div class="feed-container">
+                    {% for item in feed_items %}
+                    <div class="feed-card">
+                        <!-- Feed Header -->
+                        <div class="feed-header">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if item.poll.created_by_organization %}
+                                    <div class="feed-avatar-org">
+                                        {% if item.poll.created_by_organization.logo %}
+                                            <img src="{{ item.poll.created_by_organization.logo.url }}" alt="{{ item.poll.created_by_organization.name }}">
+                                        {% else %}
+                                            <div class="avatar-placeholder">{{ item.poll.created_by_organization.name|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'organization_profile' item.poll.created_by_organization.id %}">
+                                                {{ item.poll.created_by_organization.name }}
+                                            </a>
+                                            {% if item.poll.created_by_organization.verified %}
+                                                <i class="bi bi-check-circle-fill" style="color: var(--accent); font-size: 0.8rem;"></i>
+                                            {% endif %}
+                                        </h6>
+                                        <small class="text-muted">{{ item.added_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                {% else %}
+                                    <div class="feed-avatar">
+                                        {% if item.poll.created_by.profile.profile_picture %}
+                                            <img src="{{ item.poll.created_by.profile.profile_picture.url }}" alt="{{ item.poll.created_by.username }}">
+                                        {% else %}
+                                            <div class="avatar-placeholder">{{ item.poll.created_by.username|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'user_profile' item.poll.created_by.id %}">
+                                                {{ item.poll.created_by.username }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">{{ item.added_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Poll Content -->
+                        <div class="feed-content">
+                            <h5 class="poll-title">{{ item.poll.question }}</h5>
+                            {% if item.poll.description %}
+                            <p class="poll-description">{{ item.poll.description }}</p>
+                            {% endif %}
+
+                            <!-- Poll Options/Voting -->
+                            <div class="poll-options">
+                                {% if item.poll.id not in user_votes and not item.poll.is_closed and not item.poll.is_expired %}
+                                <form method="POST" action="{% url 'vote' item.poll.id %}">
+                                    {% csrf_token %}
+                                    {% for option in item.poll.options.all %}
+                                    <div class="vote-option">
+                                        <input type="radio" name="option_id" value="{{ option.id }}" id="opt_{{ option.id }}">
+                                        <label for="opt_{{ option.id }}" class="flex-grow-1">{{ option.option_text }}</label>
+                                    </div>
+                                    {% endfor %}
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="bi bi-hand-index me-2"></i>Vote
+                                    </button>
+                                </form>
+                                {% else %}
+                                <!-- Show Results -->
+                                {% with results=item.poll.get_results %}
+                                {% for result in results.0 %}
+                                <div class="result-row">
+                                    <div class="result-label">
+                                        <span class="result-option-name">{{ result.text }}</span>
+                                        <span class="result-stats">{{ result.votes }} vote{{ result.votes|pluralize }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ result.percentage }}%"></div>
+                                    </div>
+                                    <div class="text-end mt-1">
+                                        <small class="text-muted">{{ result.percentage }}%</small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% endwith %}
+
+                                {% if item.poll.id in user_votes %}
+                                <div class="alert alert-success mt-3">
+                                    <i class="bi bi-check-circle me-2"></i>You have voted on this poll
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Poll Meta -->
+                            <div class="poll-meta mt-3">
+                                <span class="poll-meta-item"><i class="bi bi-people"></i>{{ item.poll.total_votes }} vote{{ item.poll.total_votes|pluralize }}</span>
+                                <span class="poll-meta-item"><i class="bi bi-list-ul"></i>{{ item.poll.options.count }} options</span>
+                                {% if item.poll.expires_at %}
+                                <span class="poll-meta-item"><i class="bi bi-clock"></i>Expires {{ item.poll.expires_at|date:"M d" }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+                    <h5>Your feed is empty</h5>
+                    <p class="text-muted">Start following organizations to see polls in your feed</p>
+                    <a href="{% url 'search' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-search me-2"></i>Discover Organizations
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Suggested Organizations -->
+                <div class="sidebar-card">
+                    <h6 class="sidebar-title">Suggested Organizations</h6>
+                    <!-- TODO: Add suggested organizations component -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .feed-wrapper {
+        padding-top: calc(var(--nav-h) + 20px);
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .feed-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .feed-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        overflow: hidden;
+    }
+
+    .feed-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .feed-avatar, .feed-avatar-org {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--surface2);
+    }
+
+    .feed-avatar img, .feed-avatar-org img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent);
+        color: #0D0D0D;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .feed-content {
+        padding: 20px;
+    }
+
+    .poll-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .poll-description {
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .feed-header h6 a {
+        color: var(--text) !important;
+        text-decoration: none;
+    }
+
+    .feed-header h6 a:hover {
+        color: var(--accent) !important;
+    }
+
+    .sidebar-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .col-lg-4 {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}

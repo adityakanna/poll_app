@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxPoll - Access Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="{% static 'images/Screenshot 2026-06-10 033505.png' %}" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-accent: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f35 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-light);
+        }
+
+        .access-wrapper {
+            display: flex;
+            min-height: 100vh;
+            gap: 0;
+        }
+
+        .access-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+        }
+
+        .register-section {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .login-section {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            color: var(--text-light);
+        }
+
+        .btn-primary-accent {
+            background: var(--primary-accent);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-primary-accent:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+            color: #fff;
+        }
+
+        .btn-primary-accent:active {
+            transform: translateY(0);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-accent);
+            border-color: var(--primary-accent);
+            color: #fff;
+        }
+
+        .tab-btn:hover:not(.active) {
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-left: 4px solid;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--error);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+            color: #86efac;
+        }
+
+        .divider-text {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 24px 0 16px;
+            position: relative;
+        }
+
+        .divider-text::before,
+        .divider-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .divider-text::before {
+            left: 0;
+        }
+
+        .divider-text::after {
+            right: 0;
+        }
+
+        .link-text {
+            color: var(--primary-accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .link-text:hover {
+            color: #059669;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .logo-section {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        .logo span {
+            color: var(--primary-accent);
+        }
+
+        .stats-section {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 30px;
+            font-size: 13px;
+        }
+
+        .stat {
+            text-align: right;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--primary-accent);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        @media (max-width: 768px) {
+            .access-wrapper {
+                flex-direction: column;
+            }
+
+            .register-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .access-section {
+                padding: 40px 30px;
+            }
+
+            .stats-section {
+                position: static;
+                justify-content: center;
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="access-wrapper">
+        <!-- Registration Section -->
+        <div class="access-section register-section">
+            <div class="logo-section">
+                <div class="logo">Vox<span>Poll</span></div>
+            </div>
+
+            <div class="section-header">
+                <h1 class="section-title">Access Center</h1>
+                <p class="section-subtitle">Create your account to start</p>
+            </div>
+
+            <form id="registerForm" method="POST" action="{% url 'home' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="registerAction" value="register_user">
+
+                <!-- Register Tabs -->
+                <div class="tab-buttons">
+                    <button type="button" class="tab-btn active" data-tab="register-org">Organization</button>
+                    <button type="button" class="tab-btn" data-tab="register-user">Individual</button>
+                </div>
+
+                <!-- Messages -->
+                {% for message in messages %}
+                <div class="alert-message alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+
+                <!-- Organization Registration -->
+                <div id="register-org" class="tab-content active">
+                    <div class="form-group">
+                        <label class="form-label">Organization Name</label>
+                        <input type="text" name="org_name" class="form-control" placeholder="Your organization name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admin Email (must match domain)</label>
+                        <input type="email" name="org_email" class="form-control" placeholder="admin@yourcompany.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Choose Password</label>
+                        <input type="password" name="org_password1" class="form-control" placeholder="Create a strong password" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="org_password2" class="form-control" placeholder="Repeat your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary-accent">Register Organization</button>
+                </div>
+
+                <!-- Individual Registration -->
+                <div id="register-user" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="user_username" class="form-control" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="user_email" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Choose Password</label>
+                        <input type="password" name="user_password1" class="form-control" placeholder="Create a strong password" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="user_password2" class="form-control" placeholder="Repeat your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary-accent">Register Account</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Login Section -->
+        <div class="access-section login-section">
+            <div class="section-header">
+                <h1 class="section-title">Access Center</h1>
+                <p class="section-subtitle">Log in to your account</p>
+            </div>
+
+            <form id="loginForm" method="POST" action="{% url 'home' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="loginAction" value="login_user">
+
+                <!-- Login Tabs -->
+                <div class="tab-buttons">
+                    <button type="button" class="tab-btn active" data-tab="login-org">Organization</button>
+                    <button type="button" class="tab-btn" data-tab="login-user">User</button>
+                </div>
+
+                <!-- Messages -->
+                {% for message in messages %}
+                <div class="alert-message alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+
+                <!-- Organization Login -->
+                <div id="login-org" class="tab-content active">
+                    <div class="form-group">
+                        <label class="form-label">Developer Email (Organization scoped)</label>
+                        <input type="email" name="org_login_email" class="form-control" placeholder="admin@yourcompany.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">API Key / Password</label>
+                        <input type="password" name="org_login_password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary-accent">Login to Organization</button>
+                    <div class="divider-text">New here?</div>
+                    <button type="button" class="link-text" style="width: 100%; padding: 10px 0; border: none; background: none; font-size: 14px;">Register as Organization</button>
+                </div>
+
+                <!-- User Login -->
+                <div id="login-user" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Username or Email</label>
+                        <input type="text" name="user_login_username" class="form-control" placeholder="your username or email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="user_login_password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary-accent">Login to Account</button>
+                    <div class="divider-text">Don't have an account?</div>
+                    <button type="button" class="link-text" style="width: 100%; padding: 10px 0; border: none; background: none; font-size: 14px;">Register as User</button>
+                </div>
+            </form>
+
+            <div class="stats-section">
+                <div class="stat">
+                    <div class="stat-value">10K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">500+</div>
+                    <div class="stat-label">Active Polls</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabId = btn.dataset.tab;
+                const isLogin = tabId.startsWith('login');
+                const form = isLogin ? 'loginForm' : 'registerForm';
+                
+                // Deactivate all tabs in the same section
+                const section = btn.closest('.access-section');
+                section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                section.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Activate current tab
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+
+                // Update form action based on tab
+                if (isLogin) {
+                    document.getElementById('loginAction').value = tabId.includes('org') ? 'login_organization' : 'login_user';
+                } else {
+                    document.getElementById('registerAction').value = tabId.includes('org') ? 'register_organization' : 'register_user';
+                }
+            });
+        });
+
+        // Handle register/login button clicks that switch tabs
+        document.querySelectorAll('.link-text').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isOrgRegister = e.target.textContent.includes('Organization');
+                const targetTab = isOrgRegister ? 'register-org' : 'register-user';
+                document.querySelector(`button[data-tab="${targetTab}"]`).click();
+            });
+        });
+
+        // Form submission handling
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            const action = document.getElementById('registerAction').value;
+            e.target.action = action === 'register_organization' ? 
+                '{% url "organization_register" %}' : 
+                '{% url "register" %}';
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            const action = document.getElementById('loginAction').value;
+            e.target.action = action === 'login_organization' ? 
+                '{% url "organization_login" %}' : 
+                '{% url "login" %}';
+        });
+    </script>
+</body>
+</html>

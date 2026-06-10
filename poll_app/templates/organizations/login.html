@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}Organization Login — VoxPoll{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-accent: #10b981;
+        --dark-bg: #0f172a;
+        --card-bg: #1e293b;
+        --border-color: #334155;
+        --text-light: #e2e8f0;
+        --text-muted: #94a3b8;
+    }
+
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f35 100%);
+    }
+
+    .auth-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 60px;
+        max-width: 450px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-header {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .auth-logo {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-light);
+        margin-bottom: 16px;
+    }
+
+    .auth-logo span {
+        color: var(--primary-accent);
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-color);
+        color: var(--text-light);
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-control:focus {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        outline: none;
+        color: var(--text-light);
+    }
+
+    .btn-primary-accent {
+        background: var(--primary-accent);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 14px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-primary-accent:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        color: #fff;
+    }
+
+    .btn-primary-accent:active {
+        transform: translateY(0);
+    }
+
+    .alert-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        border-left: 4px solid;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border-left-color: #ef4444;
+        color: #fca5a5;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border-left-color: var(--primary-accent);
+        color: #86efac;
+    }
+
+    .divider-text {
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin: 24px 0 16px;
+    }
+
+    .link-button {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--primary-accent);
+        color: var(--primary-accent);
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        width: 100%;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .link-button:hover {
+        background: var(--primary-accent);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+        .auth-card {
+            padding: 40px 24px;
+        }
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">Vox<span>Poll</span></div>
+            <p class="auth-subtitle">Login to your organization account</p>
+        </div>
+
+        {% for message in messages %}
+        <div class="alert-message alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Organization Email</label>
+                <input type="email" name="email" class="form-control" placeholder="admin@yourcompany.com" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn-primary-accent">Login</button>
+        </form>
+
+        <div class="divider-text">Don't have an account?</div>
+        <a href="{% url 'organization_register' %}" class="link-button">Register Organization</a>
+
+        <div class="divider-text">Looking for personal account?</div>
+        <a href="{% url 'login' %}" class="link-button">User Login</a>
+    </div>
+</div>
+{% endblock %}

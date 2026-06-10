@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — VoxPoll{% endblock %}
+
+{% block content %}
+<div class="notifications-wrapper">
+    <div class="container">
+        <div class="notifications-header">
+            <h2>Notifications</h2>
+        </div>
+
+        {% if notifications %}
+        <div class="notifications-list">
+            {% for notification in notifications %}
+            <div class="notification-item notification-{{ notification.notification_type }}">
+                <div class="notification-content">
+                    {% if notification.sender_user %}
+                        <strong>{{ notification.sender_user.username }}</strong>
+                    {% elif notification.sender_organization %}
+                        <strong>{{ notification.sender_organization.name }}</strong>
+                    {% endif %}
+                    - {{ notification.message }}
+                </div>
+                <small class="notification-time">{{ notification.created_at|date:"M d, Y H:i" }}</small>
+                {% if notification.poll %}
+                <a href="{% url 'results' notification.poll.id %}" class="notification-link">
+                    View Poll <i class="bi bi-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="bi bi-bell"></i></div>
+            <h5>No notifications yet</h5>
+            <p class="text-muted">Your notifications will appear here</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .notifications-wrapper {
+        padding-top: calc(var(--nav-h) + 20px);
+        padding-bottom: 40px;
+        min-height: 100vh;
+    }
+
+    .notifications-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .notifications-list {
+        max-width: 600px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .notification-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+
+    .notification-item:hover {
+        border-color: var(--surface3);
+        background: rgba(110,231,183,0.02);
+    }
+
+    .notification-follow {
+        border-left-color: var(--accent);
+    }
+
+    .notification-poll_created {
+        border-left-color: var(--accent2);
+    }
+
+    .notification-content {
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .notification-time {
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .notification-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .notification-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

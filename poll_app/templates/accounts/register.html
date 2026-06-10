@@ -1,70 +1,443 @@
-{% extends 'base.html' %}
-{% block title %}Register — VoxPoll{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — VoxPoll</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            background: #0D0D0D;
+            color: #F9FAFB;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
 
-{% block content %}
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <div class="auth-logo">Vox<span>Poll</span></div>
-        <p class="auth-subtitle">Create your account and start voting</p>
+        .access-center {
+            width: 100%;
+            max-width: 450px;
+        }
 
-        {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} mb-3" role="alert">
-            <i class="bi bi-{% if message.tags == 'error' %}x-circle{% else %}check-circle{% endif %} me-2"></i>{{ message }}
+        .center-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .center-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #F9FAFB;
+        }
+
+        .center-title span {
+            color: #10B981;
+        }
+
+        .center-subtitle {
+            font-size: 1rem;
+            color: #9CA3AF;
+        }
+
+        .auth-container {
+            display: block;
+        }
+
+        .auth-section {
+            background: #111827;
+            border: 1px solid #2D3748;
+            border-radius: 12px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-section:hover {
+            border-color: #374151;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #F9FAFB;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            background: #1F2937;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #9CA3AF;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .toggle-btn.active {
+            background: #10B981;
+            color: #FFFFFF;
+        }
+
+        .toggle-btn:hover {
+            color: #F9FAFB;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #F9FAFB;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .password-toggle:hover {
+            color: #F9FAFB;
+        }
+
+        .form-control {
+            background: #1F2937;
+            border: 1px solid #374151;
+            color: #F9FAFB;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            background: #1F2937;
+            border-color: #10B981;
+            color: #F9FAFB;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #6B7280;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px 24px;
+            background: #10B981;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #374151;
+        }
+
+        .form-footer-text {
+            color: #9CA3AF;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .form-footer a {
+            color: #10B981;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .form-footer a:hover {
+            color: #059669;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #F87171;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .success-alert {
+            background: #10B98120;
+            border: 1px solid #10B981;
+            color: #6EE7B7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-alert {
+            background: #F8717120;
+            border: 1px solid #F87171;
+            color: #FCA5A5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group.hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                display: block;
+            }
+
+            .center-title {
+                font-size: 1.8rem;
+            }
+
+            .center-header {
+                margin-bottom: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="access-center">
+        <div class="center-header">
+            <a href="{% url 'home' %}" style="text-decoration: none;">
+                <div class="center-title">Vox<span>Poll</span></div>
+            </a>
+            <div class="center-subtitle">Access Center</div>
         </div>
-        {% endfor %}
 
-        <form method="POST" novalidate id="registerForm">
-            {% csrf_token %}
+        <div class="auth-container">
+            <!-- Register Section -->
+            <div class="auth-section">
+                <div class="section-title">Register</div>
 
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
-                {% if form.username.errors %}
-                {% for error in form.username.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
-                {% endfor %}
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                        <div class="success-alert">
+                            <i class="bi bi-check-circle"></i>
+                            {{ message }}
+                        </div>
+                        {% elif message.tags == 'error' %}
+                        <div class="error-alert">
+                            <i class="bi bi-exclamation-circle"></i>
+                            {{ message }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
-            </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email Address</label>
-                <input type="email" name="email" class="form-control" required>
-                {% if form.email.errors %}
-                {% for error in form.email.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
-                {% endfor %}
+                {% if show_login_button %}
+                <div class="form-group">
+                    <a href="{% url 'login' %}?email={{ login_email|urlencode }}" class="btn-submit" style="text-align:center; display:block;">Go to Login</a>
+                </div>
                 {% endif %}
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label>Account Type</label>
+                        <div class="toggle-group">
+                            <button type="button" class="toggle-btn active" onclick="setAccountType('org')">Organization Dev</button>
+                            <button type="button" class="toggle-btn" onclick="setAccountType('ind')">Individual Dev</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="org-name-group">
+                        <label>Organization Name</label>
+                        <input type="text" name="username" class="form-control" required id="org-input" value="">
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                            <div class="error-message"><i class="bi bi-x-circle"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group hidden" id="username-group">
+                        <label>Username</label>
+                        <input type="text" name="username" class="form-control" id="user-input" disabled value="">
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                            <div class="error-message"><i class="bi bi-x-circle"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dev Admin Email</label>
+                        <input type="email" name="email" class="form-control" required value="">
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                            <div class="error-message"><i class="bi bi-x-circle"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Choose Password</label>
+                        <div class="password-field">
+                            <input id="register-password1" type="password" name="password1" class="form-control" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('register-password1', this)" aria-label="Toggle password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password1.errors %}
+                            {% for error in form.password1.errors %}
+                            <div class="error-message"><i class="bi bi-x-circle"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <div class="password-field">
+                            <input id="register-password2" type="password" name="password2" class="form-control" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('register-password2', this)" aria-label="Toggle password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}
+                            {% for error in form.password2.errors %}
+                            <div class="error-message"><i class="bi bi-x-circle"></i>{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn-submit">Register</button>
+                </form>
+
+                <div class="form-footer">
+                    <div class="form-footer-text">Already have an account?</div>
+                    <a href="{% url 'login' %}">Login</a>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password1" class="form-control" required>
-                {% if form.password1.errors %}
-                {% for error in form.password1.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
-                {% endfor %}
-                {% endif %}
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" name="password2" class="form-control" required>
-                {% if form.password2.errors %}
-                {% for error in form.password2.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
-                {% endfor %}
-                {% endif %}
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 py-3">
-                <i class="bi bi-person-plus me-2"></i>Create Account
-            </button>
-        </form>
-
-        <div class="divider-text mt-4">Already have an account?</div>
-        <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100 mt-2">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-        </a>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        function setAccountType(type) {
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const orgNameGroup = document.getElementById('org-name-group');
+            const usernameGroup = document.getElementById('username-group');
+            const orgInput = document.getElementById('org-input');
+            const userInput = document.getElementById('user-input');
+            const password1 = document.getElementById('register-password1');
+            const password2 = document.getElementById('register-password2');
+            
+            // Reset fields when switching account type
+            orgInput.value = '';
+            userInput.value = '';
+            if (password1) password1.value = '';
+            if (password2) password2.value = '';
+
+            if (type === 'org') {
+                orgNameGroup.classList.remove('hidden');
+                usernameGroup.classList.add('hidden');
+                orgInput.disabled = false;
+                orgInput.required = true;
+                userInput.disabled = true;
+                userInput.required = false;
+            } else {
+                orgNameGroup.classList.add('hidden');
+                usernameGroup.classList.remove('hidden');
+                orgInput.disabled = true;
+                orgInput.required = false;
+                userInput.disabled = false;
+                userInput.required = true;
+            }
+        }
+        
+        // Initialize: hide org-name-group on page load if Individual Dev is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            const orgNameGroup = document.getElementById('org-name-group');
+            orgNameGroup.classList.remove('hidden');
+        });
+
+        function togglePassword(fieldId, button) {
+            const input = document.getElementById(fieldId);
+            if (!input) {
+                return;
+            }
+            const icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) {
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                }
+            } else {
+                input.type = 'password';
+                if (icon) {
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

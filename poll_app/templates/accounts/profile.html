@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }}'s Profile — VoxPoll{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .profile-header {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 12px;
+        padding: 40px;
+        margin-bottom: 40px;
+    }
+
+    .profile-header-content {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(56, 189, 248, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        border: 3px solid rgba(56, 189, 248, 0.5);
+        flex-shrink: 0;
+    }
+
+    .profile-picture img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-username {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #F9FAFB;
+        margin-bottom: 10px;
+    }
+
+    .profile-email {
+        color: #9CA3AF;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .profile-bio {
+        color: #D1D5DB;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #10B981 0%, #38BDF8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: #10B981;
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #10B981;
+        border: 2px solid #10B981;
+    }
+
+    .btn-secondary:hover {
+        background: #10B981;
+        color: #0D0D0D;
+    }
+
+    .btn-settings {
+        background: transparent;
+        color: #38BDF8;
+        border: 2px solid #38BDF8;
+    }
+
+    .btn-settings:hover {
+        background: #38BDF8;
+        color: #0D0D0D;
+    }
+
+    .privacy-notice {
+        background: rgba(56, 189, 248, 0.1);
+        border-left: 4px solid #38BDF8;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 30px;
+        color: #D1D5DB;
+        font-size: 0.95rem;
+    }
+
+    .private-section {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 4px solid #EF4444;
+        padding: 15px;
+        border-radius: 6px;
+        color: #FCA5A5;
+        margin-bottom: 20px;
+    }
+
+    .section-card {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #F9FAFB;
+        margin-bottom: 20px;
+    }
+
+    .section-description {
+        color: #9CA3AF;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .user-list {
+        list-style: none;
+    }
+
+    .user-item {
+        padding: 15px;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .user-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        color: #F9FAFB;
+        font-weight: 600;
+    }
+
+    .user-status {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #9CA3AF;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #4B5563;
+    }
+
+    .privacy-badge {
+        display: inline-block;
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            margin: 20px auto;
+        }
+
+        .profile-header {
+            padding: 20px;
+        }
+
+        .profile-header-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            font-size: 3rem;
+        }
+
+        .profile-username {
+            font-size: 1.5rem;
+        }
+
+        .profile-stats {
+            justify-content: center;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .section-card {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <div class="profile-picture">
+                {% if user_profile.profile_picture %}
+                    <img src="{{ user_profile.profile_picture.url }}" alt="Profile picture">
+                {% else %}
+                    <i class="bi bi-person"></i>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <div class="profile-username">
+                    {{ profile_user.username }}
+                    {% if privacy.account_visibility == 'public' %}
+                        <span class="privacy-badge">
+                            <i class="bi bi-globe me-1"></i>Public
+                        </span>
+                    {% else %}
+                        <span class="privacy-badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8;">
+                            <i class="bi bi-lock me-1"></i>Private
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="profile-email">{{ profile_user.email }}</div>
+
+                {% if user_profile.bio %}
+                    <div class="profile-bio">{{ user_profile.bio }}</div>
+                {% endif %}
+
+                <!-- Profile Stats -->
+                {% if request.user == profile_user %}
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-number">{{ polls_created }}</div>
+                            <div class="stat-label">Polls Created</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">{{ polls_participated }}</div>
+                            <div class="stat-label">Polls Participated</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">{{ votes_cast }}</div>
+                            <div class="stat-label">Votes Cast</div>
+                        </div>
+                        {% if can_view_followers %}
+                            <div class="stat">
+                                <div class="stat-number">{{ followers_count }}</div>
+                                <div class="stat-label">Followers</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="profile-actions">
+                    {% if request.user == profile_user %}
+                        <a href="{% url 'privacy_settings' %}" class="btn btn-settings">
+                            <i class="bi bi-shield-lock"></i>Privacy Settings
+                        </a>
+                        <a href="{% url 'settings' %}" class="btn btn-settings">
+                            <i class="bi bi-gear"></i>Account Settings
+                        </a>
+                    {% else %}
+                        {% if is_following %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="unfollow" class="btn btn-secondary">
+                                    <i class="bi bi-person-check-fill"></i>Following
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="follow" class="btn btn-primary">
+                                    <i class="bi bi-person-plus"></i>Follow
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not request.user == profile_user and privacy.account_visibility == 'private' %}
+        <div class="privacy-notice">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            This is a private account. Some information may not be visible.
+        </div>
+    {% endif %}
+
+    <!-- Followers Section -->
+    {% if can_view_followers %}
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="bi bi-people-fill me-2" style="color: #10B981;"></i>Followers
+            </h2>
+            {% if followers %}
+                <ul class="user-list">
+                    {% for follower in followers %}
+                        <li class="user-item">
+                            <div class="user-info">
+                                <a href="{% url 'profile' follower.username %}" class="user-name">
+                                    {{ follower.username }}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="bi bi-person-x"></i></div>
+                    <p>No followers yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% elif not request.user == profile_user %}
+        <div class="private-section">
+            <i class="bi bi-lock-fill me-2"></i>
+            This user has hidden their followers list. Respect their privacy!
+        </div>
+    {% endif %}
+
+    <!-- Following Section -->
+    {% if can_view_following %}
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="bi bi-person-check-fill me-2" style="color: #38BDF8;"></i>Following
+            </h2>
+            {% if following %}
+                <ul class="user-list">
+                    {% for user_following in following %}
+                        <li class="user-item">
+                            <div class="user-info">
+                                <a href="{% url 'profile' user_following.username %}" class="user-name">
+                                    {{ user_following.username }}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="bi bi-person-plus"></i></div>
+                    <p>Not following anyone yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% elif not request.user == profile_user %}
+        <div class="private-section">
+            <i class="bi bi-lock-fill me-2"></i>
+            This user has hidden their following list. Respect their privacy!
+        </div>
+    {% endif %}
+
+    <!-- Privacy Information -->
+    <div class="section-card">
+        <h2 class="section-title">
+            <i class="bi bi-shield-check me-2" style="color: #10B981;"></i>Privacy Protection
+        </h2>
+        <p class="section-description">
+            VoxPoll protects your privacy across the entire platform:
+        </p>
+        <ul style="color: #D1D5DB; line-height: 1.8; margin-left: 20px;">
+            <li>🔒 Voting history is completely private and never visible to other users</li>
+            <li>👥 Followers and following lists are private unless you choose to share them</li>
+            <li>📊 Poll creators only see anonymous vote counts, never who voted</li>
+            <li>📬 Notifications are only sent for activities relevant to your account</li>
+            <li>⚙️ You control all privacy settings and can change them anytime</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
