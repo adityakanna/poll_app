@@ -361,36 +361,4 @@
         event.target.classList.add('active');
     }
 </script>
-
-        .home-main {
-            order: 1;
-        }
-
-        .auth-tabs {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-</style>
-
-<script>
-    function switchTab(tab, event) {
-        event.preventDefault();
-        
-        // Hide all tabs
-        document.querySelectorAll('.auth-form-container').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        // Remove active class from all buttons
-        document.querySelectorAll('.auth-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Show selected tab
-        document.getElementById(tab + '-tab').style.display = 'block';
-        
-        // Add active class to clicked button
-        event.target.classList.add('active');
-    }
-</script>
 {% endblock %}

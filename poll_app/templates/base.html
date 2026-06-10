@@ -29,6 +29,10 @@
 
         * { box-sizing: border-box; }
         
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background: var(--brand);
             color: var(--text);
@@ -36,6 +40,24 @@
             font-size: 15px;
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        img, picture, video, iframe, svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .card, .poll-card, .stat-card, .auth-form-container, .auth-sidebar-content {
+            min-width: 0;
+            word-wrap: break-word;
         }
 
         h1, h2, h3, h4, h5, h6, .display-font {
@@ -93,11 +115,11 @@
             background: var(--surface2);
         }
 
-        .nav-link i { margin-right: 6px; 
+        .nav-link i { margin-right: 6px;
                       color: white;
         }
-        
-        .text-muted small me-2{
+
+        .text-muted.small.me-2 {
             color: white;
         }
 
@@ -367,6 +389,40 @@
         .toast.toast-error { border-left: 4px solid var(--danger); }
         .toast.toast-info { border-left: 4px solid var(--accent2); }
         .toast.toast-warning { border-left: 4px solid var(--warning); }
+
+        @media (max-width: 768px) {
+            .navbar .container {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar .d-flex.align-items-center.gap-2 {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .poll-question {
+                font-size: 1rem;
+            }
+
+            .toast-container {
+                right: 10px;
+                left: 10px;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: calc(100vw - 40px);
+            }
+        }
 
         /* ─── MODALS ─── */
         .modal-content {
